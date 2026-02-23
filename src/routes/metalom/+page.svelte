@@ -23,20 +23,6 @@ function displayInfo() {
     metaQntCeil = Math.ceil(metaQnt);
     
     pric = (metaQntCeil * price.value).toFixed(2);
-	
-	const output = document.querySelector(".output");
-
-	 `
-    <h3>Soma</h3>
-    <p>${info.sum/100}m | ${metaQntCeil} metalom (${metaQnt})</p>
-	<br>
-    <h3>Preço</h3>
-    <p>R$${pric}</p>
-	<br>
-    <h3>Lista:</h3>
-    ${
-    	list.map(([msr, qnt])=>`<p>${qnt} x ${msr} cm</p>`).join("")
-    }`;
 }
 
 
@@ -70,9 +56,9 @@ function metalomInfo(str){
 
 <div class="container">
     <h3>Metragem Metalom</h3>
-    <input class="input metric" type="number" value="6" min="1" bind:this={metric}/>
+    <input class="input metric" type="number" value="6" min="1" bind:this={metric} on:input={displayInfo}/>
     <h3>Preço Metalom</h3>
-    <input class="input price" type="number" value="40" min="1" bind:this={price}/>
+    <input class="input price" type="number" value="40" min="1" bind:this={price} on:input={displayInfo}/>
     <h3>Codigo do OpenSCAD</h3>
     <textarea class="input" placeholder="ex:
     ECHO: 'met. 2 x 2 => 59.5'
@@ -84,15 +70,15 @@ function metalomInfo(str){
 
         {#if met != undefined}
             <h3>Soma</h3>
-            <p>{info.sum/100}m | ${metaQntCeil} metalom ({metaQnt})</p>
+            <p>{info.sum/100}m | {metaQntCeil} metalom ({metaQnt})</p>
             <br>
             <h3>Preço</h3>
-            <p>R${pric}</p>
+            <p>R$ {pric}</p>
             <br>
             <h3>Lista:</h3>
             {#each list as [msr, qnt]}
             <p>
-                {qnt} x {msr} cm
+                {qnt} und x {msr} cm
             </p>
             {/each}
         {/if}
