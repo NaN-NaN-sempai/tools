@@ -8,6 +8,6 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<a href="/">All tool</a>
+<a href="/">All tools</a>
 
 {@render children()}
