@@ -1,5 +1,5 @@
 <script>
-    import content from "./metalom.scad?raw";
+    import content from "$lib/metalom/metalom.scad?raw";
 
     const copy = () => {
         navigator.clipboard.writeText(content);
