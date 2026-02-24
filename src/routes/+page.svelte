@@ -9,8 +9,11 @@
         .replace(/\[([^\]]+)\]/g, ':$1') );
 
     const desc = {
-        "/metalom": "(pr-BR) calcular metalom da string da minha lib do OpenSCAD"
+        "/metalom": `(pr-BR) calcular metalom e madeira da string da <a href="/metalom/lib">minha lib do OpenSCAD</a>`,
     };
+    const hide = [
+        "/metalom/lib",
+    ];
 </script>
 
 
@@ -18,16 +21,20 @@
 <h2>Toolist</h2>
 <ul>
     {#each routes as route}
+    {#if !hide.includes(route)}
+    
         <li>
             <a href={route}>{route}</a>
             {#if desc[route]}
-                - <span class="routeDesc">{desc[route]}</span>
+                - <span class="routeDesc">{@html desc[route]}</span>
             {/if}
         </li>
+    {/if}
     {/each}
 </ul>
 
 <style>
+    * {font-family: sans-serif}
     .routeDesc {
         
         color: gray;
