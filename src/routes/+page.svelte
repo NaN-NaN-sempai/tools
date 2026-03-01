@@ -9,35 +9,64 @@
         .replace(/\[([^\]]+)\]/g, ':$1') );
 
     const desc = {
-        "/metalom": `(pr-BR) calcular metalom e madeira da string da <a href="/metalom/lib">minha lib do OpenSCAD</a>`,
+        "/metalon": `(pr-BR) calcular metalom e madeira da string da <a href="/metalon/lib">minha lib do OpenSCAD</a>`,
+        "/pasteImage": "Paste image and get Base64 and image preview",
     };
     const hide = [
-        "/metalom/lib",
+        "/metalon/lib",
     ];
 </script>
 
 
-<h1>Luis Henrique Space - Tools</h1>
-<h2>Toolist</h2>
-<ul>
-    {#each routes as route}
-    {#if !hide.includes(route)}
-    
-        <li>
-            <a href={route}>{route}</a>
-            {#if desc[route]}
-                - <span class="routeDesc">{@html desc[route]}</span>
-            {/if}
-        </li>
-    {/if}
-    {/each}
-</ul>
+<div class="container">
+    <h2>Toolist :</h2>
+    <ul>
+        {#each routes as route}
+        {#if !hide.includes(route)}
+        
+            <div class="item">
+                <a class="title" href={route}>
+                    {route}
+                </a>
+                {#if desc[route]}
+                    <span class="routeDesc">{@html desc[route]}</span>
+                {/if}
+            </div>
+        {/if}
+        {/each}
+    </ul>
 
+</div>
 <style>
     * {font-family: sans-serif}
     .routeDesc {
         
         color: gray;
         font-size: 0.8em;
+    }
+    .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .container h1, .container h2 {
+        text-align: center;
+    }
+
+    .container .title {
+        background: #1c1931;
+        color: white;
+        font-weight: bold;
+        padding: 5px;
+        display: block;
+        text-align: center;
+        border-radius: 5px;
+    }
+    .container .item {
+        margin: 10px 0;
+        padding: 5px 10px;
+        border: solid 1px #ccc;
+        border-radius: 5px;
     }
 </style>

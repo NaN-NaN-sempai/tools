@@ -1,5 +1,5 @@
 <script>
-    import content from "$lib/metalom/metalom.scad?raw";
+    import content from "$lib/metalon/metalon.scad?raw";
 
     const copy = () => {
         navigator.clipboard.writeText(content);
@@ -10,7 +10,7 @@
 
 <div class="output">
     <h1 class="highlight">Luis Henrique Space</h1>
-    <h2 class="highlight">Metalom OpenSCAD Lib</h2>
+    <h2 class="highlight">Metalon OpenSCAD Lib</h2>
     <button on:click={copy}>Copiar código</button>
     <pre>{content}</pre>
 </div>
