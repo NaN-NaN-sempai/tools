@@ -42,6 +42,43 @@ async function displayInfo() {
 }
 
 
+let useCuttingStock = true;
+function cuttingStockMetalon(pieces) {
+    let allPieces = [];
+    pieces.forEach(p => {
+        for(let i=0;i<p.qnt;i++) allPieces.push(p.length);
+    });
+
+    allPieces.sort((a,b)=>b-a);
+
+    let minMetalons = allPieces.length;
+
+    function search(index, bins) {
+        if(index === allPieces.length){
+            minMetalons = Math.min(minMetalons, bins.length);
+            return;
+        }
+
+        const piece = allPieces[index];
+
+        for(let i=0;i<bins.length;i++){
+            if(bins[i] + piece <= metric * 100){
+                bins[i] += piece;
+                search(index+1, bins);
+                bins[i] -= piece;
+            }
+        }
+
+        bins.push(piece);
+        search(index+1, bins);
+        bins.pop();
+    }
+
+    search(0, []);
+
+    return minMetalons;
+}
+
 function gatherInfo(str){
     const metalomList = [];
     const woodList = [];
@@ -88,6 +125,38 @@ function gatherInfo(str){
         e.sizes.forEach(e=>total += e.qnt * e.length);
         sum.push({type: e.type, length: total});
     });
+    
+    const metAmt = useCuttingStock?
+    sizes.map(e => ({
+        type: e.type,
+        metalons: cuttingStockMetalon(e.sizes)
+    })) :
+    sizes.map(e => {
+        let allPieces = [];
+        e.sizes.forEach(s => {
+            for(let i = 0; i < s.qnt; i++) allPieces.push(s.length);
+        });
+        
+        allPieces.sort((a,b) => b-a);
+
+        let metalons = [];
+
+        allPieces.forEach(p => {
+            let placed = false;
+            for(let i=0; i<metalons.length; i++){
+                if(metalons[i] + p <= metric * 100){
+                    metalons[i] += p;
+                    placed = true;
+                    break;
+                }
+            }
+            if(!placed) metalons.push(p);
+        });
+
+        return { type: e.type, metalons: metalons.length };
+    });
+    
+    
 
     const woodSizes = [];
 
@@ -103,14 +172,11 @@ function gatherInfo(str){
 
         if(!typeQuery) woodSizes.push({type, qnt: 1});
         else typeQuery.qnt += 1;                
-    })
-
-    console.log(woodSizes);
-    
+    });    
 
 
     return {
-        sum, sizes, woodSizes
+        sum, metAmt, sizes, woodSizes
     }
 
 }
@@ -142,26 +208,22 @@ onMount(async()=>{
     <br>
 
     <h3>Codigo do OpenSCAD :</h3>
+    <label>
+        <input type="checkbox" bind:checked={useCuttingStock}>
+        <small> Usar <strong>cutting stock</strong> - metalon (mais pesado) </small>
+    </label>
     <textarea class="input" placeholder="ex:
     ECHO: 'met. 2 x 2 => 59.5'
     ECHO: 'met. 2 x 2 => 59.5'" bind:this={input} on:input={displayInfo}>
-METALOMLIST:
-"
-ECHO: "met. 20 x 20 => 230"
-ECHO: "met. 20 x 20 => 230"
-ECHO: "met. 20 x 20 => 230"
-ECHO: "met. 20 x 20 => 230"
-ECHO: "met. 20 x 20 => 28"
-ECHO: "met. 20 x 20 => 28"
-ECHO: "met. 20 x 20 => 28"
-ECHO: "met. 20 x 20 => 28"
-ECHO: "mad. 156 x 30 x 3"
-ECHO: "met. 15 x 15 => 156"
-ECHO: "met. 15 x 15 => 30"
-ECHO: "met. 15 x 15 => 30"
-ECHO: "mad. 156 x 30 x 3"
-ECHO: "mad. 108 x 30 x 3"
-ECHO: "mad. 156 x 30 x 3"
+PRATELEIRA JANELA
+ECHO: "met. 20 x 20 => 170"
+ECHO: "met. 20 x 20 => 170"
+ECHO: "met. 20 x 20 => 30"
+ECHO: "met. 20 x 20 => 170"
+ECHO: "met. 20 x 20 => 170"
+ECHO: "met. 20 x 20 => 30"
+ECHO: "mad. 224 x 30 x 2"
+ECHO: "mad. 224 x 30 x 2"
     </textarea>
 
     <hr>
@@ -178,7 +240,7 @@ ECHO: "mad. 156 x 30 x 3"
                             =
                             <span class="highlight">{(length/100).toFixed(2)}m</span>
                             |
-                            <span class="highlight">{Math.ceil((length/100)/metric)}</span>
+                            <span class="highlight">{info.metAmt.find(e=>e.type == type).metalons}</span>
                             metalon
                             <span class="highlight"> <small>≈ {((length/100)/metric).toFixed(2)}</small></span>
                         </p>
