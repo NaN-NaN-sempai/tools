@@ -89,7 +89,14 @@ export async function GET({ url }) {
 			}
 		},
 		{ width, height, 
-      fonts: [], }
+      fonts: [
+
+  {
+    name: 'System',
+    data: new Uint8Array(), // vazio funciona
+    style: 'normal'
+  }
+	  ], }
 	);
 
     return img;
