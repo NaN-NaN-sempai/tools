@@ -1,6 +1,10 @@
 import { ImageResponse } from '@vercel/og';
 
 export async function GET({ url }) {
+    const font = await fetch(
+    new URL('/fonts/inter.ttf', url.origin)
+    ).then(r => r.arrayBuffer());
+
     const value = url.searchParams.get('value');
 
     const displayValue = value ? `R$ ${parseFloat(value).toFixed(2)}` : 'Valor a definir';
@@ -32,7 +36,12 @@ export async function GET({ url }) {
                     },
                 }
             },
-            { width, height, fonts: [] });
+            { width, height, fonts: [
+    {
+      name: "Inter",
+      data: font
+    }
+  ] });
 
     } else {
         img = new ImageResponse(
@@ -102,7 +111,12 @@ export async function GET({ url }) {
                     ]
                 }
             },
-            { width, height, fonts: [] }
+            { width, height, fonts: [
+    {
+      name: "Inter",
+      data: font
+    }
+  ] }
         );
     }
 
