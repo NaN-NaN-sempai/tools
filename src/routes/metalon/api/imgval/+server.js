@@ -1,9 +1,12 @@
+export const runtime = "nodejs"
+
 import sharp from "sharp";
 import fs from "fs";
 
 
+
 const banner = fs.readFileSync(
-	process.cwd() + "/static/assets/publicShare/banner w val.png"
+	process.cwd() + "/static/assets/publicShare/banner.png"
 );
 const bannerBase64 = banner.toString("base64");
 
@@ -15,7 +18,7 @@ export async function GET({ url }) {
     message = message? message : 'Novo Orcamento';
 
 	const displayValue = value
-		? `R$ ${parseFloat(value).toFixed(2)}`
+		? `R$ ${parseFloat(value || 0).toFixed(2)}`
 		: 'R$ 0.00';
 
 	const width = 996;
@@ -58,12 +61,10 @@ export async function GET({ url }) {
 
 
 
-	const png = await sharp(Buffer.from(svg)).png().toBuffer();
-    
-	return new Response(png, {
-		headers: {
-			"Content-Type": "image/png",
-			"Cache-Control": "public, max-age=31536000"
-		}
-	});
+try {
+	const png = await sharp(Buffer.from(svg), { density: 300 }).png().toBuffer();
+	return new Response(png, { headers: { "Content-Type": "image/png" } });
+} catch (e) {
+	return new Response(e.toString());
+}
 }
