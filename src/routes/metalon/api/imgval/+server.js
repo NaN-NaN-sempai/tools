@@ -57,7 +57,6 @@ export async function GET({ url }) {
 											color: "#1C1931",
 											fontSize: Math.max(40, 155 - (displayValue.length * 6)) + "px",
 											fontWeight: "bold",
-											fontFamily: "sans-serif",
 											textShadow: "0 0 2px #1C1931, 0 0 2px #1C1931, 0 0 2px #1C1931",
 										},
 										children: displayValue
@@ -76,7 +75,6 @@ export async function GET({ url }) {
 											paddingTop: "0",
 											borderRadius: "10px",
 											textAlign: "right",
-											fontFamily: "sans-serif",
 											display: message? "block": "none",
 										},
 										children: message
@@ -88,15 +86,7 @@ export async function GET({ url }) {
 				]
 			}
 		},
-		{ width, height, 
-      fonts: [
-
-  {
-    name: 'System',
-    data: new Uint8Array(), // vazio funciona
-    style: 'normal'
-  }
-	  ], }
+		{ width, height, }
 	);
 
     return img;
