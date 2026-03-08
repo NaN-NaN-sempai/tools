@@ -1,5 +1,13 @@
 import { ImageResponse } from '@vercel/og';
 
+import Geist from "./geist.base64?raw"
+
+
+
+const fontData = Uint8Array.from(atob(Geist), c => c.charCodeAt(0));
+
+
+
 export async function GET({ url }) {
     const value = url.searchParams.get('value');
 
@@ -56,7 +64,7 @@ export async function GET({ url }) {
 											fontSize: Math.max(40, 155 - (displayValue.length * 6)) + "px",
 											fontWeight: "bold",
 											textShadow: "0 0 2px #1C1931, 0 0 2px #1C1931, 0 0 2px #1C1931",
-											fontFamily: "sans-serif",
+											fontFamily: "Geist",
 										},
 										children: displayValue
 									}
@@ -75,7 +83,7 @@ export async function GET({ url }) {
 											borderRadius: "10px",
 											textAlign: "right",
 											display: message? "block": "none",
-											fontFamily: "sans-serif",
+											fontFamily: "Geist",
 										},
 										children: message
 									}
@@ -86,7 +94,14 @@ export async function GET({ url }) {
 				]
 			}
 		},
-		{ width, height }
+		{ width, height, 
+      fonts: [
+        {
+          name: 'Geist',
+          data: fontData,
+          style: 'regular',
+        },
+      ], }
 	);
 
     return img;
