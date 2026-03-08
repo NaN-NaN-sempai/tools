@@ -1,10 +1,12 @@
 export function GET({ url }) {
 	const value = url.searchParams.get('value');
-	const message = url.searchParams.get('name') || '';
+	let message = url.searchParams.get('name') || '';
+
+    message = message? message : 'Novo Orcamento';
 
 	const displayValue = value
 		? `R$ ${parseFloat(value).toFixed(2)}`
-		: 'Valor a definir';
+		: 'R$ 0.00';
 
 	const width = 996;
 	const height = 523;

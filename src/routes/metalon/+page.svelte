@@ -334,8 +334,7 @@ const shareOrder = () => {
         (info?.adicionaisPrice || 0);
 
     navigator.share({
-        title: "Luís Henrique Space - Metalon",
-        text: `Orçamento: ${obj.name}\n\n${obj.notes}`,
+        title: "Luís Henrique Space - Tools | Orçamento Metalon",
         url: window.location.href.split("?")[0] + `?shared=${LZString.compressToEncodedURIComponent(JSON.stringify(obj))}&name=${obj.name}&value=${totalValue}`
     })
     
