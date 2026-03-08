@@ -1,4 +1,14 @@
-export function GET({ url }) {
+import sharp from "sharp";
+import fs from "fs";
+
+
+const banner = fs.readFileSync(
+	process.cwd() + "/static/assets/publicShare/banner w val.png"
+);
+const bannerBase64 = banner.toString("base64");
+
+
+export async function GET({ url }) {
 	const value = url.searchParams.get('value');
 	let message = url.searchParams.get('name') || '';
 
@@ -16,7 +26,7 @@ export function GET({ url }) {
 
 	const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-	<image href="${url.origin}/assets/publicShare/banner w val.png" width="100%" height="100%"/>
+	<image href="data:image/png;base64,${bannerBase64}" width="100%" height="100%"/>
 	
 	<text
 		x="70%"
@@ -46,9 +56,14 @@ export function GET({ url }) {
 </svg>
 `;
 
-	return new Response(svg, {
+
+
+	const png = await sharp(Buffer.from(svg)).png().toBuffer();
+    
+	return new Response(png, {
 		headers: {
-			'Content-Type': 'image/svg+xml'
+			"Content-Type": "image/png",
+			"Cache-Control": "public, max-age=31536000"
 		}
 	});
 }
