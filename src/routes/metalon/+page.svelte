@@ -1,11 +1,8 @@
 <script>
-    import { page } from "$app/state";
     import { onMount, tick } from "svelte";
+    
 
     import LZString from "lz-string";
-
-    page.title = "Metalon";
-
     export let data;
 
     console.log(data);
@@ -426,7 +423,7 @@ onMount(() => {
         <br><br>
 
         <h3>Preço Metalon :</h3>
-        {#each info.sizes as item}
+        {#each (info.sizes || []) as item}
             <h4>{item.type}</h4>
             <input class="input" type="number" name="price {item.type}" placeholder="preço {item.type}" bind:value={item.price} on:input={displayInfo}/>
         {:else}

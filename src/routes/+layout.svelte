@@ -2,8 +2,6 @@
     import { page } from '$app/stores';
 	import favicon from '$lib/assets/faviconDark.png';
     import GoHomeIcon from '../components/goHomeIcon.svelte';
-
-	export let children = () => {};
 </script>
 
 <svelte:head>
@@ -20,7 +18,8 @@
 	<h1>Luís Henrique Space - {$page.data.title || 'Tools'}</h1>
 </header>
 
-{@render children()}
+
+<slot />
 
 
 <style>
