@@ -6,6 +6,11 @@
 
     page.title = "Metalon";
 
+    export let data;
+
+    console.log(data);
+    
+
 let input;
 let metric = 6;
 let price;
@@ -30,14 +35,9 @@ let formObject = {};
 async function displayInfo(doInfo=true){
     formObject = Object.fromEntries(new FormData(form));
 
-    console.log(info);
-    
-
     info = gatherInfo(input.value);
 
     await tick();
-
-    console.log(info);
     
     formObject = Object.fromEntries(new FormData(form));
 
@@ -185,12 +185,12 @@ function gatherInfo(str){
 
     let tintasPrice = 0;
 
-    tintas.forEach(e=>{
+    (tintas || []).forEach(e=>{
         tintasPrice += e.price * e.qnt;
     });
 
     let adicionaisPrice = 0;
-    adicionais.forEach(e=>{
+    (adicionais || []).forEach(e=>{
         adicionaisPrice += e.price;
     });
 
@@ -328,10 +328,15 @@ const loadOrder = (e) => {
 const shareOrder = () => {
     const obj = gatherOrder();
 
+    const totalValue = 
+        (info?.totalPrice || 0) +
+        (info?.tintasPrice || 0) + 
+        (info?.adicionaisPrice || 0);
+
     navigator.share({
         title: "Luís Henrique Space - Metalon",
         text: `Orçamento: ${obj.name}\n\n${obj.notes}`,
-        url: window.location.href.split("?")[0] + "?shared=" + LZString.compressToEncodedURIComponent(JSON.stringify(obj))
+        url: window.location.href.split("?")[0] + `?shared=${LZString.compressToEncodedURIComponent(JSON.stringify(obj))}&name=${obj.name}&value=${totalValue}`
     })
     
 }
@@ -361,6 +366,13 @@ onMount(() => {
 });
 </script>
 
+
+<svelte:head>
+	<meta property="og:title" content="Luís Henrique Space - Tools | Metalon">
+    <meta property="og:description" content="Ferramenta para orçamentos de metalon - Luís Henrique Space | Tools">
+	<meta property="og:image" content="https://luishenrique.space/metalon/api/imgval?{data.value? "value=" + data.value + "&" : ""}{data.name? "name=" + data.name : ""}">
+	<meta property="og:url" content="https://luishenrique.space/metalon">
+</svelte:head>
 
 
 
