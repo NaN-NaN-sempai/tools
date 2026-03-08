@@ -366,7 +366,7 @@ onMount(() => {
 <svelte:head>
 	<meta property="og:title" content="Luís Henrique Space - Tools | Metalon">
     <meta property="og:description" content="Ferramenta para orçamentos de metalon - Luís Henrique Space | Tools">
-	<meta property="og:image" content="https://tools.luishenrique.space/metalon/api/imgval?{data.value? "value=" + data.value + "&" : ""}{data.name? "name=" + data.name : ""}">
+	<meta property="og:image" content="https://pay.luishenrique.space/api/imgval/tools-metalon?{data.value? "value=" + data.value + "&" : ""}{data.name? "name=" + data.name : ""}">
 </svelte:head>
 
 
