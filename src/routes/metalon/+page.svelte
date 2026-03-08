@@ -546,7 +546,7 @@ onMount(() => {
                         und 
                         <span class="highlight">{name}</span>
                         =
-                        <span class="highlight price">R$ {(qnt*price).toFixed(2)}</span>
+                        <span class="highlight price">R$ {((qnt*price) || 0).toFixed(2)}</span>
                     </p>
                     {:else}
                         <p class="tintas"><i><small>Sem tintas...</small></i></p>
@@ -564,7 +564,7 @@ onMount(() => {
                     <p class="adicionais">
                         <span class="highlight">{name}</span>
                         =
-                        <span class="highlight price">R$ {(price).toFixed(2)}</span>
+                        <span class="highlight price">R$ {(price || 0).toFixed(2)}</span>
                     </p>
                     {:else}
                         <p class="adicionais"><i><small>Sem adicionais...</small></i></p>
