@@ -99,7 +99,7 @@ export async function GET({ url }) {
         {
           name: 'Geist',
           data: fontData,
-          style: 'regular',
+          style: 'normal',
         },
       ], }
 	);
