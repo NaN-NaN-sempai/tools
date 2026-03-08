@@ -49,9 +49,15 @@
         max-width: 600px;
         margin: 0 auto;
         padding: 20px;
+        box-sizing: border-box;
     }
     .container h1, .container h2 {
         text-align: center;
+    }
+
+    .container ul {
+        list-style: none;
+        padding: 0;
     }
 
     .container .title {
@@ -62,6 +68,7 @@
         display: block;
         text-align: center;
         border-radius: 5px;
+        margin-bottom: .5rem;
     }
     .container .item {
         margin: 10px 0;

@@ -2,6 +2,8 @@
     import { page } from "$app/state";
     import { onMount, tick } from "svelte";
 
+    import LZString from "lz-string";
+
     page.title = "Metalon";
 
 let input;
@@ -188,7 +190,10 @@ function gatherInfo(str){
 
 onMount(async()=>{
     displayInfo();
-})
+});
+
+
+
 
 
 let tintas = [
@@ -217,6 +222,10 @@ const removeTinta = (index) => {
 
     displayInfo();
 }
+
+
+
+
 
 let infoName;
 let savedOrders = [];
@@ -289,7 +298,7 @@ const shareOrder = () => {
     navigator.share({
         title: "Luís Henrique Space - Metalon",
         text: `Orçamento: ${obj.name}\n\n${obj.notes}`,
-        url: window.location.href.split("?")[0] + "?shared=" + JSON.stringify(obj)
+        url: window.location.href.split("?")[0] + "?shared=" + LZString.compressToEncodedURIComponent(JSON.stringify(obj))
     })
     
 }
@@ -304,7 +313,7 @@ onMount(() => {
 
     let query;
     if(shared) {
-        query = JSON.parse(shared);
+        query = JSON.parse(LZString.decompressFromEncodedURIComponent(shared));
         
     } else {
         query = savedOrders.find(e=>e.name == order);
