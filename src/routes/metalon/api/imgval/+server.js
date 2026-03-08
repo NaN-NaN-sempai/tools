@@ -20,6 +20,7 @@ export async function GET({ url }) {
                 type: 'div',
                 props: {
                     style: {
+                        fontFamily: 'sans-serif',
                         width: `${width}px`,
                         height: `${height}px`,
                         backgroundImage:
@@ -40,6 +41,7 @@ export async function GET({ url }) {
                 type: 'div',
                 props: {
                     style: {
+                        fontFamily: 'sans-serif',
                         width: `${width}px`,
                         height: `${height}px`,
                         backgroundImage:
