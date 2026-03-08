@@ -1,68 +1,92 @@
-import sharp from "sharp";
-import fs from "fs";
-
-
-
-const banner = fs.readFileSync(
-	process.cwd() + "/static/assets/publicShare/banner.png"
-);
-const bannerBase64 = banner.toString("base64");
-
+import { ImageResponse } from '@vercel/og';
 
 export async function GET({ url }) {
-	const value = url.searchParams.get('value');
-	let message = url.searchParams.get('name') || '';
+    const value = url.searchParams.get('value');
 
-    message = message? message : 'Novo Orcamento';
+    const displayValue = value ? `R$ ${parseFloat(value).toFixed(2)}` : 'Valor a definir';
+    let message = url.searchParams.get('name') || '';
 
-	const displayValue = value
-		? `R$ ${parseFloat(value || 0).toFixed(2)}`
-		: 'R$ 0.00';
-
-	const width = 996;
-	const height = 523;
-
-    const priceSize = Math.max(40, 155 - (displayValue.length * 6));
-    const messageSize = Math.max(25, 80 - (message.length * 2));
-
-	const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-	<image href="data:image/png;base64,${bannerBase64}" width="100%" height="100%"/>
-	
-	<text
-		x="70%"
-		y="85%"
-	    text-anchor="middle"
-		font-size="${priceSize}"
-        font-family="Arial"
-		font-weight="bold"
-		fill="#1c1931"
-	>
-		${displayValue}
-	</text>
-
-	${
-		message
-			? `<text
-                x="70%"
-                y="60%"
-	text-anchor="middle"
-                font-size="${messageSize}"
-                font-family="Arial"
-                font-weight="bold"
-                fill="#1c1931"
-			>~ ${message} ~</text>`
-			: ''
-	}
-</svg>
-`;
+	message = message? `~ ${message} ~`: '';
 
 
+    const width = 996;
+    const height = 523;
 
-try {
-	const png = await sharp(Buffer.from(svg), { density: 300 }).png().toBuffer();
-	return new Response(png, { headers: { "Content-Type": "image/png" } });
-} catch (e) {
-	return new Response(e.toString());
-}
+    let img ;
+
+    console.log(((11 - displayValue.length) * 1 ));
+    
+
+
+	img = new ImageResponse(
+		{
+			type: 'div',
+			props: {
+				style: {
+					width: `${width}px`,
+					height: `${height}px`,
+					backgroundImage:
+						`url(${url.origin}/assets/publicShare/banner.png)`,
+					backgroundSize: 'cover',
+					backgroundPosition: 'center',
+					display: 'flex',
+					flexDirection: 'column',
+					alignItems: 'flex-end',
+				},
+				children: [
+					{
+						type: "div",
+						props: {
+							style: {
+								width: (width  * 0.538)+"px",
+								height: "233px",
+								marginRight: "22px",
+								marginTop: "260px",
+								display: 'flex',
+								flexDirection: 'column',
+								justifyContent: message? 'space-between': 'center',
+								alignItems: 'flex-end',
+							},
+							children: [
+								{
+									type: "span",
+									props: {
+										style: {
+											color: "#1C1931",
+											fontSize: Math.max(40, 155 - (displayValue.length * 6)) + "px",
+											fontWeight: "bold",
+											textShadow: "0 0 2px #1C1931, 0 0 2px #1C1931, 0 0 2px #1C1931",
+										},
+										children: displayValue
+									}
+								},
+								{
+									type: "span",
+									props: {
+										style: {
+											color: "#1C1931",
+											fontSize: "3rem",
+											fontWeight: "bold",
+											lineHeight: ".9",
+											textShadow: "0 0 2px #1C1931",
+											padding: "10px",
+											paddingTop: "0",
+											borderRadius: "10px",
+											textAlign: "right",
+											display: message? "block": "none",
+										},
+										children: message
+									}
+								},
+							]
+						}
+					}
+				]
+			}
+		},
+		{ width, height }
+	);
+
+    return img;
+    
 }
