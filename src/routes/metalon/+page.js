@@ -1,1 +1,1 @@
-export const load = () => ({ title: "Metalon" });
+export const load = () => ({ title: "Orçamento Metalon" });
