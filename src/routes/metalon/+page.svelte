@@ -25,8 +25,9 @@ const savedPrices = {
 let form;
 let formObject = {};
 
-async function displayInfo() {
-	info = gatherInfo(input.value);
+async function displayInfo(doInfo=true){
+    if(doInfo)
+	    info = gatherInfo(input.value);
 
     await tick();
 
@@ -220,14 +221,17 @@ const removeTinta = (index) => {
 let infoName;
 let savedOrders = [];
 let orderNotes = "";
-const saveOrder = () => {
-    const saveObj = {
+const gatherOrder = () => {
+    return {
         info,
         tintas,
         name: infoName.value,
         useCuttingStock,
         notes: orderNotes,
     };
+}
+const saveOrder = () => {
+    const saveObj = gatherOrder();
     
     savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
 
@@ -260,6 +264,8 @@ const loadOrderObj = obj => {
     infoName.value = obj.name;
     orderNotes = obj.notes;
 
+    displayInfo(false);
+
 
     const url = new URL(window.location);
     url.searchParams.set("order", obj.name);
@@ -277,14 +283,32 @@ const loadOrder = (e) => {
     loadOrderObj(order);
 }
 
+const shareOrder = () => {
+    const obj = gatherOrder();
+
+    navigator.share({
+        title: "Luís Henrique Space - Metalon",
+        text: `Orçamento: ${obj.name}\n\n${obj.notes}`,
+        url: window.location.href.split("?")[0] + "?shared=" + JSON.stringify(obj)
+    })
+    
+}
+
 onMount(() => {
     savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
-
+    
     // get search
     const urlParams = new URLSearchParams(window.location.search);
-    const search = urlParams.get("order");
+    const order = urlParams.get("order");
+    const shared = urlParams.get("shared");
 
-    const query = savedOrders.find(e=>e.name == search);
+    let query;
+    if(shared) {
+        query = JSON.parse(shared);
+        
+    } else {
+        query = savedOrders.find(e=>e.name == order);
+    }
 
     if(!query) return;
 
@@ -310,6 +334,13 @@ onMount(() => {
                 <option value={index}>{order.name}</option>
             {/each}
         </select>
+    </label>
+
+    <br>
+    <br>
+    <label>
+        Compartilhar Orçamento :
+        <button on:click={shareOrder}>compartilhar</button>
     </label>
     <br>
     <hr>
