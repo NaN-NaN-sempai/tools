@@ -34,6 +34,7 @@ export async function GET({ url }) {
 					display: 'flex',
 					flexDirection: 'column',
 					alignItems: 'flex-end',
+					fontFamily: "sans-serif",
 				},
 				children: [
 					{
@@ -46,6 +47,7 @@ export async function GET({ url }) {
 								marginTop: "260px",
 								display: 'flex',
 								flexDirection: 'column',
+								fontFamily: "sans-serif",
 								justifyContent: message? 'space-between': 'center',
 								alignItems: 'flex-end',
 							},
@@ -57,6 +59,7 @@ export async function GET({ url }) {
 											color: "#1C1931",
 											fontSize: Math.max(40, 155 - (displayValue.length * 6)) + "px",
 											fontWeight: "bold",
+											fontFamily: "sans-serif",
 											textShadow: "0 0 2px #1C1931, 0 0 2px #1C1931, 0 0 2px #1C1931",
 										},
 										children: displayValue
@@ -75,6 +78,7 @@ export async function GET({ url }) {
 											paddingTop: "0",
 											borderRadius: "10px",
 											textAlign: "right",
+											fontFamily: "sans-serif",
 											display: message? "block": "none",
 										},
 										children: message
