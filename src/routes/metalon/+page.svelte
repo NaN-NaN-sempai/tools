@@ -33,8 +33,7 @@ async function displayInfo(doInfo=true){
     console.log(info);
     
 
-    if(doInfo)
-	    info = gatherInfo(input.value);
+    info = gatherInfo(input.value);
 
     await tick();
 
@@ -43,7 +42,7 @@ async function displayInfo(doInfo=true){
     formObject = Object.fromEntries(new FormData(form));
 
     info.totalPrice = 0;
-    info.sum.forEach(e=>{
+    info.sum?.forEach(e=>{
         const price = formObject["price "+e.type] || 0;
         const qnt = Math.ceil((e.length/100)/6);
         info.totalPrice += price * qnt;
@@ -89,7 +88,7 @@ function cuttingStockMetalon(pieces) {
 }
 
 function gatherInfo(str){
-    if(!str && info.size == undefined)
+    if(!str && info.size != undefined)
         return info;
 
     const metalomList = [];
@@ -501,7 +500,7 @@ onMount(() => {
                             +
                             <span class="highlight">{item.name}</span>
                             =
-                            <span class="highlight price">R$ {item.price?.toFixed(2)}</span>
+                            <span class="highlight price">R$ {(item.price || 0).toFixed(2)}</span>
                         </p>
                         
                     {/each}
