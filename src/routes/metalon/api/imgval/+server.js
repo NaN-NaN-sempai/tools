@@ -56,6 +56,7 @@ export async function GET({ url }) {
 											fontSize: Math.max(40, 155 - (displayValue.length * 6)) + "px",
 											fontWeight: "bold",
 											textShadow: "0 0 2px #1C1931, 0 0 2px #1C1931, 0 0 2px #1C1931",
+											fontFamily: "sans-serif",
 										},
 										children: displayValue
 									}
@@ -74,6 +75,7 @@ export async function GET({ url }) {
 											borderRadius: "10px",
 											textAlign: "right",
 											display: message? "block": "none",
+											fontFamily: "sans-serif",
 										},
 										children: message
 									}
