@@ -38,7 +38,6 @@ async function displayInfo() {
         const qnt = Math.ceil((e.length/100)/6);
         info.totalPrice += price * qnt;
     });
-    
 }
 
 
@@ -152,7 +151,6 @@ function gatherInfo(str){
             }
             if(!placed) metalons.push(p);
         });
-
         return { type: e.type, metalons: metalons.length };
     });
     
@@ -172,11 +170,17 @@ function gatherInfo(str){
 
         if(!typeQuery) woodSizes.push({type, qnt: 1});
         else typeQuery.qnt += 1;                
-    });    
+    });
+
+    let tintasPrice = 0;
+
+    tintas.forEach(e=>{
+        tintasPrice += e.price * e.qnt;
+    });
 
 
     return {
-        sum, metAmt, sizes, woodSizes
+        sum, metAmt, sizes, woodSizes, tintasPrice
     }
 
 }
@@ -185,12 +189,151 @@ onMount(async()=>{
     displayInfo();
 })
 
+
+let tintas = [
+    {
+        name: "Preto Fosco",
+        qnt: 1,
+        price: 100
+    }
+];
+
+const addTinta = () => {
+    tintas.push({
+        name: "Preto Fosco",
+        qnt: 1,
+        price: 100
+    });
+
+    displayInfo();
+
+    tintas = tintas;   
+}
+
+const removeTinta = (index) => {
+    tintas.splice(index, 1);
+    tintas = tintas;
+
+    displayInfo();
+}
+
+let infoName;
+let savedOrders = [];
+let orderNotes = "";
+const saveOrder = () => {
+    const saveObj = {
+        info,
+        tintas,
+        name: infoName.value,
+        useCuttingStock,
+        notes: orderNotes,
+    };
+    
+    savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
+
+    if(!infoName.value){
+        return alert("Insira um nome para o orçamento!");
+    }
+
+    if(savedOrders.find(e=>e.name == infoName.value)){
+        savedOrders = savedOrders.map(e=>{
+            if(e.name == infoName.value) return saveObj;
+            return e;
+        });
+
+        alert("Orçamento '" + infoName.value + "' atualizado com sucesso!");
+
+    } else {
+        savedOrders.push(saveObj);
+
+        alert("Orçamento '" + infoName.value + "' salvo com sucesso!");
+    }
+
+    localStorage.setItem("savedOrders", JSON.stringify(savedOrders));
+
+    window.location.search = `order=${infoName.value}`;
+}
+const loadOrderObj = obj => {
+    useCuttingStock = obj.useCuttingStock;
+    info = obj.info;
+    tintas = obj.tintas;
+    infoName.value = obj.name;
+    orderNotes = obj.notes;
+
+
+    const url = new URL(window.location);
+    url.searchParams.set("order", obj.name);
+
+    window.history.replaceState({}, "", url);
+}
+
+const loadOrder = (e) => {
+    let localSave = JSON.parse(localStorage.getItem("savedOrders") || "[]");
+
+    const order = localSave[e.target.value];
+
+    if(!order) return alert("Nenhum orçamento encontrado!");
+
+    loadOrderObj(order);
+}
+
+onMount(() => {
+    savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
+
+    // get search
+    const urlParams = new URLSearchParams(window.location.search);
+    const search = urlParams.get("order");
+
+    const query = savedOrders.find(e=>e.name == search);
+
+    if(!query) return;
+
+    loadOrderObj(query);
+});
 </script>
 
 
 
 
 <form class="container" on:submit|preventDefault bind:this={form}>
+
+    <h3>Nome do Orçamento : </h3>
+    <input type="text" bind:this={infoName} />
+    <button on:click={saveOrder}>salvar</button>
+    <br>
+    
+    <label>
+        Carregar Orçamento :
+        <select on:change={loadOrder}>
+            <option value="">Nenhum</option>
+            {#each savedOrders as order, index}
+                <option value={index}>{order.name}</option>
+            {/each}
+        </select>
+    </label>
+    <br>
+    <hr>
+
+    <h3>Codigo do OpenSCAD :</h3>
+    <label>
+        <input type="checkbox" bind:checked={useCuttingStock}>
+        <small> Usar <strong>cutting stock</strong> - metalon (mais pesado) </small>
+    </label>
+    <textarea class="input" placeholder="ex:
+    ECHO: 'met. 2 x 2 => 59.5'
+    ECHO: 'met. 2 x 2 => 59.5'" bind:this={input} on:input={displayInfo}>{1? "":`PRATELEIRA JANELA
+ECHO: "met. 20 x 20 => 170"
+ECHO: "met. 20 x 20 => 170"
+ECHO: "met. 20 x 20 => 30"
+ECHO: "met. 20 x 20 => 170"
+ECHO: "met. 20 x 20 => 170"
+ECHO: "met. 20 x 20 => 30"
+ECHO: "mad. 224 x 30 x 2"
+ECHO: "mad. 224 x 30 x 2"`}</textarea>
+
+    <br>
+    <br>
+
     <h3>Metragem Metalon :</h3>
     <input class="input metric" type="number" min="1" bind:value={metric} on:input={displayInfo}/>
     <br>
@@ -203,30 +346,60 @@ onMount(async()=>{
     {:else}
         <h4>Aguardando dados...</h4>
     {/each}
-
     <br>
     <br>
 
-    <h3>Codigo do OpenSCAD :</h3>
-    <label>
-        <input type="checkbox" bind:checked={useCuttingStock}>
-        <small> Usar <strong>cutting stock</strong> - metalon (mais pesado) </small>
-    </label>
-    <textarea class="input" placeholder="ex:
-    ECHO: 'met. 2 x 2 => 59.5'
-    ECHO: 'met. 2 x 2 => 59.5'" bind:this={input} on:input={displayInfo}>
-PRATELEIRA JANELA
-ECHO: "met. 20 x 20 => 170"
-ECHO: "met. 20 x 20 => 170"
-ECHO: "met. 20 x 20 => 30"
-ECHO: "met. 20 x 20 => 170"
-ECHO: "met. 20 x 20 => 170"
-ECHO: "met. 20 x 20 => 30"
-ECHO: "mad. 224 x 30 x 2"
-ECHO: "mad. 224 x 30 x 2"
-    </textarea>
+    <h3>Tintas :</h3>
+    <button on:click={addTinta}>Adicionar tinta</button>
+    {#each tintas as tinta, index}
+        <br>
+        <br>
+        <input type="text" id="tinta_{index}" bind:value={tinta.name} placeholder="Nome da tinta">
+        <br>
+        <input type="number" id="tinta_{index}_qnt" bind:value={tinta.qnt} on:input={displayInfo} placeholder="Quantidade">
+        <br>
+        <input type="number" id="tinta_{index}_price" bind:value={tinta.price} on:input={displayInfo} placeholder="Preço">
+        <br>
+        <button on:click={() => removeTinta(index)}>remover</button>
+    {/each}
+    <br>
+    <br>
+
+    <br>
 
     <hr>
+
+    <div class="output">
+        <div class="spliter">
+            <div class="outputContainer">
+                <h3>Preço total :</h3>
+                    <p>
+                        Total =
+                        <span class="highlight"> R$ {(
+                            info?.totalPrice +
+                            info?.tintasPrice
+                        )?.toFixed(2)}</span>
+                    </p>
+                    {#if info?.totalPrice}
+                    <p>
+                        <span class="highlight">Metalon</span>
+                        =
+                        <span class="highlight">R$ {info?.totalPrice?.toFixed(2)}</span>
+                    </p>
+                    {/if}
+
+                    {#if info?.tintasPrice}
+                    <p>
+                        <span class="highlight">Tintas</span>
+                        =
+                        <span class="highlight">R$ {info?.tintasPrice?.toFixed(2)}</span>
+                    </p>
+                    {/if}
+            </div>
+        </div>
+    </div> 
+    <hr>
+
 
     <div class="output">
 
@@ -244,6 +417,8 @@ ECHO: "mad. 224 x 30 x 2"
                             metalon
                             <span class="highlight"> <small>≈ {((length/100)/metric).toFixed(2)}</small></span>
                         </p>
+                    {:else}
+                        <p><i>Aguardando dados...</i></p>
                     {/each}
                 </div>
 
@@ -258,6 +433,24 @@ ECHO: "mad. 224 x 30 x 2"
                             <span class="highlight">{type}</span> =
                             <span class="highlight"> R$ {(Math.ceil((length/100)/6) * formObject["price "+type]).toFixed(2)}</span>
                         </p>
+                    {/each}
+                </div>
+
+                <div class="outputContainer">
+                    <h3>Lista Tintas : </h3>
+                    <p>
+                        Total =
+                        <span class="highlight"> R$ {info?.tintasPrice?.toFixed(2)}</span>
+                    </p>
+                    {#each tintas as {qnt, name, price}}
+                    <p>
+                        <span class="highlight">{name}</span>
+                        =
+                        <span class="highlight">{qnt}</span>
+                        und 
+                        |
+                        <span class="highlight">R$ {(qnt*price).toFixed(2)}</span>
+                    </p>
                     {/each}
                 </div>
             </div>
@@ -279,7 +472,10 @@ ECHO: "mad. 224 x 30 x 2"
                         <span class="highlight">{length}</span>
                         cm
                     </p>
+                    
                     {/each}
+                    {:else}
+                        <p><i>Aguardando dados...</i></p>
                     {/each}
                 </div>
 
@@ -298,7 +494,16 @@ ECHO: "mad. 224 x 30 x 2"
                         </span>
                         cm
                     </p>
+                    {:else}
+                        <p><i>Aguardando dados...</i></p>
                     {/each}
+                </div>
+
+                <div class="outputContainer">
+                    <h3>Notas : </h3>
+                    <p>
+                        <textarea placeholder="Notas gerais sobre o orcamento..." bind:value={orderNotes}></textarea>
+                    </p>
                 </div>
             </div>
             
@@ -336,6 +541,12 @@ hr {
     padding: 10px;
 	width: auto;
     margin-bottom: 5px;
+}
+.output p textarea {
+    width: 100%;
+    outline: none;
+    border: none;
+    background: transparent
 }
 .output .highlight {
     background: rgba(255, 255, 255, 0.8);
