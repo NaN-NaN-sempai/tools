@@ -772,10 +772,10 @@ hr {
     font-weight: bold;
 }
 .output .highlight.price {
-    color: #16A34A;
+    color: #5fac00;
 }
 .output .highlight.total {
-    color: #008dc4;
+    color: #16A34A;
 }
 
 .output {
