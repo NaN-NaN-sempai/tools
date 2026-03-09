@@ -4,8 +4,6 @@
 
     import LZString from "lz-string";
     export let data;
-
-    console.log(data);
     
 
 let input;
@@ -29,12 +27,15 @@ const savedPrices = {
 let form;
 let formObject = {};
 
-async function displayInfo(doInfo=true){
+async function displayInfo(infoObj){
     formObject = Object.fromEntries(new FormData(form));
 
-    info = gatherInfo(input.value);
-
+    info = infoObj !== undefined ? infoObj : gatherInfo(input.value);
+    
     await tick();
+    
+
+    notesTextareaChange();
     
     formObject = Object.fromEntries(new FormData(form));
 
@@ -197,10 +198,6 @@ function gatherInfo(str){
 
 }
 
-onMount(async()=>{
-    displayInfo();
-});
-
 
 
 
@@ -253,11 +250,16 @@ const removeAdicional = (index) => {
 }
 
 
+let orderNotes = "";
+let notesTextarea;
+const notesTextareaChange = () => {    
+    notesTextarea.style.height = "auto";
+    notesTextarea.style.height = notesTextarea.scrollHeight + 3 + "px";
+}
 
 
 let infoName;
 let savedOrders = [];
-let orderNotes = "";
 const gatherOrder = () => {
     return {
         info,
@@ -299,12 +301,11 @@ const loadOrderObj = obj => {
     info = obj.info;
     tintas = obj.tintas;
     infoName.value = obj.name;
-    orderNotes = obj.notes;
     adicionais = obj.adicionais;
     metric = obj.metric;
+    orderNotes = obj.notes;
 
-    displayInfo(false);    
-
+    displayInfo(obj.info);
 
     const url = new URL(window.location);
     url.searchParams.set("order", obj.name);
@@ -512,6 +513,19 @@ onMount(() => {
                         
                     {/each}
                     {/if}
+                    
+
+                <div class="outputContainer">
+                    <h3>Notas : </h3>
+                    <p>
+                        <textarea placeholder="Notas gerais sobre o orcamento..."
+                            readonly={!inputAreaVisible}
+                            style:resize={inputAreaVisible ? "vertical" : "none"}
+                            bind:value={orderNotes}
+                            on:input={notesTextareaChange}
+                            bind:this={notesTextarea}></textarea>
+                    </p>
+                </div>
             </div>
         </div>
     </div> 
@@ -641,13 +655,6 @@ onMount(() => {
                         <p class="madeira"><i>Aguardando dados...</i></p>
                     {/each}
                 </div>
-
-                <div class="outputContainer">
-                    <h3>Notas : </h3>
-                    <p>
-                        <textarea placeholder="Notas gerais sobre o orcamento..." readonly={!inputAreaVisible} bind:value={orderNotes}></textarea>
-                    </p>
-                </div>
                 
                 <hr>                
             </div>
@@ -655,6 +662,12 @@ onMount(() => {
         {/if}
 
     </div>
+    
+    <h4>
+        <button on:click={() => inputAreaVisible = !inputAreaVisible}>
+            {inputAreaVisible ? "Fechar" : "Abrir"} menu de entradas
+        </button>
+    </h4>
 </form>
 
 
