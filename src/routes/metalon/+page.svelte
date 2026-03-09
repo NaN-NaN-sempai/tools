@@ -390,6 +390,11 @@ onMount(() => {
     <div class="inputArea" class:visible={!inputAreaVisible}>
         <h1>Orçamento</h1>
         <h2>~ {infoName?.value || "Novo Orçamento"} ~</h2>
+        
+        <h4>
+            <button on:click={shareOrder}>compartilhar</button>
+        </h4>
+
         <br><br>
     </div>
 
@@ -687,6 +692,19 @@ onMount(() => {
 
 
 <style>
+.container * {margin: 0; padding: 0; font-family: sans-serif}
+
+
+button {
+    padding: 0 4px !important;
+    margin: 2px 0 !important;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #1c1931;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
 
 .output p.metalon {
     background: rgba(0, 0, 0, 0.48);
@@ -714,7 +732,6 @@ onMount(() => {
 .container {
     padding: 30px;
 }
-.container * {margin: 0; padding: 0; font-family: sans-serif}
 .input {
     width: 100%;
     padding-inline: 5px;
