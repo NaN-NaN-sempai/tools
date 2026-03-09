@@ -729,6 +729,10 @@ button {
 }
 .inputArea.visible {
     display: block;
+    
+    box-sizing: border-box;
+    max-width: 800px;
+    margin: auto;
 }
 .container {
     padding: 30px;
@@ -783,6 +787,9 @@ hr {
     display: flex;
     flex-direction: row;
     gap: 10px;
+    box-sizing: border-box;
+    max-width: 700px;
+    margin: auto;
 }
 
 .output .spliter {
@@ -797,7 +804,7 @@ hr {
 }
 
 
-@media screen and (max-width: 810px) {
+@media screen and (max-width: 700px) {
     .output {
         flex-direction: column;
         gap: 0;
