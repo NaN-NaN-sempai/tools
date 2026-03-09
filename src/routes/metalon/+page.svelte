@@ -90,12 +90,12 @@ function gatherInfo(str){
     let sum = [];
     let metAmt = [];
     let woodSizes = [];
-
-    const metalomList = [];
-    const woodList = [];
     
     
     if(str && info.sizes == undefined){
+        const metalomList = [];
+        const woodList = [];
+
         str.split("\n").filter(e=>e).forEach(e=>{
             let split = e.slice(12,-1).split(" => ");
 
@@ -521,7 +521,8 @@ onMount(() => {
 
                     {#if info?.adicionaisPrice}
                     {#each adicionais as item}
-                        <p class:madeira={item.name.toLowerCase().includes("madeira")}
+                        <p  class:madeira={item.name.toLowerCase().includes("madeira")}
+                            class:metalon={item.name.toLowerCase().includes("metalon")}
                             class="adicionais">
                             +
                             <span class="highlight">{item.name}</span>
