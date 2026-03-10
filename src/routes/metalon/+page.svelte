@@ -30,7 +30,10 @@ let formObject = {};
 async function displayInfo(infoObj){
     formObject = Object.fromEntries(new FormData(form));
 
-    info = infoObj.sizes !== undefined ? infoObj : gatherInfo(input.value);
+    info = infoObj?.sizes !== undefined ? infoObj : gatherInfo(input.value);
+
+    console.log(info);
+    
 
     await tick();
     
@@ -92,7 +95,7 @@ function gatherInfo(str){
     let woodSizes = [];
     
     
-    if(str && info.sizes == undefined){
+    if(str){        
         const metalomList = [];
         const woodList = [];
 
@@ -136,7 +139,7 @@ function gatherInfo(str){
             sum.push({type: e.type, length: total});
         });
         
-        const metAmt = useCuttingStock?
+        metAmt = useCuttingStock?
         sizes.map(e => ({
             type: e.type,
             metalons: cuttingStockMetalon(e.sizes)
@@ -162,6 +165,7 @@ function gatherInfo(str){
                 }
                 if(!placed) metalons.push(p);
             });
+            
             return { type: e.type, metalons: metalons.length };
         });
         
@@ -565,7 +569,7 @@ onMount(() => {
                     </p>
                     {#each info.sum as {type, length}}
                         <p class="metalon">
-                            <span class="highlight">{info.metAmt.find(e=>e.type == type).metalons}</span>
+                            <span class="highlight">{info.metAmt.find(e=>e.type == type)?.metalons}</span>
                             und 
                             <span class="highlight">{type}</span> =
                             <span class="highlight price"> R$ {(Math.ceil((length/100)/metric) * formObject["price "+type]).toFixed(2)}</span>
@@ -625,7 +629,7 @@ onMount(() => {
                             =
                             <span class="highlight">{(length/100).toFixed(2)}m</span>
                             |
-                            <span class="highlight">{info.metAmt.find(e=>e.type == type).metalons}</span>
+                            <span class="highlight">{info.metAmt.find(e=>e.type == type)?.metalons}</span>
                             und
                             <span class="highlight"> <small>≈ {((length/100)/metric).toFixed(2)}</small></span>
                         </p>
