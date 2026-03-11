@@ -75,8 +75,15 @@
                 detailedListMini = [...detailedListMini, ...auxList];
                 auxList = [];
 
+                const query = detailedListMini.filter(e=>
+                    e.type == "title" &&
+                    e?.text?.startsWith(item[0])
+                );
+
+                let text = item[0] + ((query && query.length) ? ` - ${query.length+1}` : "");
+
                 const obj = {
-                    text: item[0],
+                    text,
                     type: "title",
                 };
 
