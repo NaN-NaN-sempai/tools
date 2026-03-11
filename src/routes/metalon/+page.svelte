@@ -518,7 +518,7 @@
             </label>
             <br><hr>
     
-            <h3>Codigo do OpenSCAD :</h3>
+            <h3>Codigo <a href="https://openscad.org/">OpenSCAD</a> / <a href="https://github.com/NaN-NaN-sempai/SpaceSCAD">SpaceSCAD</a> :</h3>
             <label>
                 <input type="checkbox" bind:checked={useCuttingStock}>
                 <small> Usar <strong>cutting stock</strong> - metalon (mais pesado) </small>
@@ -592,7 +592,7 @@
         <div class="output">
             <div class="spliter">
                 <div class="outputContainer">
-                    <h3>Preço total :</h3>
+                    <h3>Preço Total :</h3>
                         <p>
                             Total =
                             <span class="highlight total"> R$ {(
@@ -715,7 +715,7 @@
                     <hr>
                     <div class="outputContainer" class:hidden={displayLists}>
 
-                        <h3>Listas Simples :</h3>
+                        <h3>Materiais Avulso :</h3>
                         <p>
                             <button on:click={() => displayLists = true}>Expandir Listas</button>
                         </p>
@@ -727,7 +727,7 @@
 
                     <div class="outputContainer">
                         
-                        <h3>Listas Simples :</h3>
+                        <h3>Materiais Avulso :</h3>
                         <p>
                             <button on:click={() => displayLists = false}>Recolher Listas</button>
                         </p>
@@ -807,7 +807,7 @@
             {#if info.sum != undefined}
                 <div class="spliter">
                     <div class="outputContainer">
-                        <h3>Lista detalhada :</h3>
+                        <h3>Materiais por Peça :</h3>
                         <p>
                             <button on:click={() => expandList = !expandList}>
                                 {expandList ? "Recolher" : "Expandir"} Lista
