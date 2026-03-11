@@ -735,7 +735,7 @@
 
                 
                     <div class="outputContainer">
-                        <h3>Soma Metalon :</h3>
+                        <h3>Quantidade Metalon :</h3>
                         {#each info.sum as {type, length}}
                             <p class="metalon">
                                 <span class="highlight">{type}</span>
