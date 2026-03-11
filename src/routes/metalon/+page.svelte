@@ -3,6 +3,8 @@
     
 
     import LZString from "lz-string";
+    import Lhs from "./partners/lhs.svelte";
+    import Mr from "./partners/mr.svelte";
     export let data;
     
 
@@ -388,316 +390,359 @@ onMount(() => {
 </svelte:head>
 
 
+<div class="pageContainer">
 
-<form class="container" on:submit|preventDefault bind:this={form}>
-
-    <div class="inputArea" class:visible={!inputAreaVisible}>
-        <h1>Orçamento</h1>
-        <h2>~ {infoName?.value || "Novo Orçamento"} ~</h2>
-        
-        <h4>
-            <button on:click={shareOrder}>compartilhar</button>
-        </h4>
-
-        <br><br>
-    </div>
-
-    <div class="inputArea" class:visible={inputAreaVisible}>
-        <h3>Nome do Orçamento : </h3>
-        <input type="text" bind:this={infoName} />
-        <button on:click={saveOrder}>salvar</button>
-        <br>
-        
-        <label> Carregar Orçamento :
-            <select on:change={loadOrder}>
-                <option value="">Nenhum</option>
-                {#each savedOrders as order, index}
-                    <option value={index}>{order.name}</option>
-                {/each}
-            </select>
-        </label>
-        <br><br>
-
-        <label> Compartilhar Orçamento :
-            <button on:click={shareOrder}>compartilhar</button>
-        </label>
-        <br><hr>
-
-        <h3>Codigo do OpenSCAD :</h3>
-        <label>
-            <input type="checkbox" bind:checked={useCuttingStock}>
-            <small> Usar <strong>cutting stock</strong> - metalon (mais pesado) </small>
-        </label>
-        <textarea class="input" placeholder="ex:
-        ECHO: 'met. 2 x 2 => 59.5'
-        ECHO: 'met. 2 x 2 => 59.5'" bind:this={input} on:input={displayInfo}>{1? "":`PRATELEIRA JANELA
-    ECHO: "met. 20 x 20 => 170"
-    ECHO: "met. 20 x 20 => 170"
-    ECHO: "met. 20 x 20 => 30"
-    ECHO: "met. 20 x 20 => 170"
-    ECHO: "met. 20 x 20 => 170"
-    ECHO: "met. 20 x 20 => 30"
-    ECHO: "mad. 224 x 30 x 2"
-    ECHO: "mad. 224 x 30 x 2"`}</textarea>
-        <br><br>
-
-        <h3>Metragem Metalon :</h3>
-        <input class="input metric" type="number" min="1" bind:value={metric} on:input={displayInfo}/>
-        <br><br>
-
-        <h3>Preço Metalon :</h3>
-        {#each (info.sizes || []) as item}
-            <h4>{item.type}</h4>
-            <input class="input" type="number" name="price {item.type}" placeholder="preço {item.type}" bind:value={item.price} on:input={displayInfo}/>
-        {:else}
-            <h4>Aguardando dados...</h4>
-        {/each}
-        <br>
-        <br>
-
-        <h3>Tintas :</h3>
-        <button on:click={addTinta}>Adicionar tinta</button>
-        {#each tintas as tinta, index}
+    <form class="container" on:submit|preventDefault bind:this={form}>
+    
+        <div class="inputArea" class:visible={!inputAreaVisible}>
+            <h1>Orçamento</h1>
+            <h2>~ {infoName?.value || "Novo Orçamento"} ~</h2>
+            
+            <h4>
+                <button on:click={shareOrder}>compartilhar</button>
+            </h4>
+    
+            <br><br>
+        </div>
+    
+        <div class="inputArea" class:visible={inputAreaVisible}>
+            <h3>Nome do Orçamento : </h3>
+            <input type="text" bind:this={infoName} />
+            <button on:click={saveOrder}>salvar</button>
+            <br>
+            
+            <label> Carregar Orçamento :
+                <select on:change={loadOrder}>
+                    <option value="">Nenhum</option>
+                    {#each savedOrders as order, index}
+                        <option value={index}>{order.name}</option>
+                    {/each}
+                </select>
+            </label>
+            <br><br>
+    
+            <label> Compartilhar Orçamento :
+                <button on:click={shareOrder}>compartilhar</button>
+            </label>
+            <br><hr>
+    
+            <h3>Codigo do OpenSCAD :</h3>
+            <label>
+                <input type="checkbox" bind:checked={useCuttingStock}>
+                <small> Usar <strong>cutting stock</strong> - metalon (mais pesado) </small>
+            </label>
+            <textarea class="input" placeholder="ex:
+            ECHO: 'met. 2 x 2 => 59.5'
+            ECHO: 'met. 2 x 2 => 59.5'" bind:this={input} on:input={displayInfo}>{1? "":`PRATELEIRA JANELA
+        ECHO: "met. 20 x 20 => 170"
+        ECHO: "met. 20 x 20 => 170"
+        ECHO: "met. 20 x 20 => 30"
+        ECHO: "met. 20 x 20 => 170"
+        ECHO: "met. 20 x 20 => 170"
+        ECHO: "met. 20 x 20 => 30"
+        ECHO: "mad. 224 x 30 x 2"
+        ECHO: "mad. 224 x 30 x 2"`}</textarea>
+            <br><br>
+    
+            <h3>Metragem Metalon :</h3>
+            <input class="input metric" type="number" min="1" bind:value={metric} on:input={displayInfo}/>
+            <br><br>
+    
+            <h3>Preço Metalon :</h3>
+            {#each (info.sizes || []) as item}
+                <h4>{item.type}</h4>
+                <input class="input" type="number" name="price {item.type}" placeholder="preço {item.type}" bind:value={item.price} on:input={displayInfo}/>
+            {:else}
+                <h4>Aguardando dados...</h4>
+            {/each}
             <br>
             <br>
-            <input type="text" id="tinta_{index}" bind:value={tinta.name} placeholder="Nome da tinta">
+    
+            <h3>Tintas :</h3>
+            <button on:click={addTinta}>Adicionar tinta</button>
+            {#each tintas as tinta, index}
+                <br>
+                <br>
+                <input type="text" id="tinta_{index}" bind:value={tinta.name} placeholder="Nome da tinta">
+                <br>
+                <input type="number" id="tinta_{index}_qnt" bind:value={tinta.qnt} on:input={displayInfo} placeholder="Quantidade">
+                <br>
+                <input type="number" id="tinta_{index}_price" bind:value={tinta.price} on:input={displayInfo} placeholder="Preço">
+                <br>
+                <button on:click={() => removeTinta(index)}>remover</button>
+            {:else}
+            <h4>Sem tintas...</h4>
+            {/each}
             <br>
-            <input type="number" id="tinta_{index}_qnt" bind:value={tinta.qnt} on:input={displayInfo} placeholder="Quantidade">
             <br>
-            <input type="number" id="tinta_{index}_price" bind:value={tinta.price} on:input={displayInfo} placeholder="Preço">
+    
+            <h3>Adicionais :</h3>
+            <button on:click={addAdicional}>Adicionar adicional</button>
+            {#each adicionais as item, index}
+                <br>
+                <br>
+                <input type="text" id="adc_{index}" bind:value={item.name} placeholder="Nome do adicional">
+                <br>
+                <input type="number" id="adc_{index}_price" bind:value={item.price} on:input={displayInfo} placeholder="Preço">
+                <br>
+                <button on:click={() => removeAdicional(index)}>remover</button>
+            {:else}
+            <h4>Sem adicionais...</h4>
+            {/each}
             <br>
-            <button on:click={() => removeTinta(index)}>remover</button>
-        {:else}
-        <h4>Sem tintas...</h4>
-        {/each}
-        <br>
-        <br>
-
-        <h3>Adicionais :</h3>
-        <button on:click={addAdicional}>Adicionar adicional</button>
-        {#each adicionais as item, index}
             <br>
+    
             <br>
-            <input type="text" id="adc_{index}" bind:value={item.name} placeholder="Nome do adicional">
-            <br>
-            <input type="number" id="adc_{index}_price" bind:value={item.price} on:input={displayInfo} placeholder="Preço">
-            <br>
-            <button on:click={() => removeAdicional(index)}>remover</button>
-        {:else}
-        <h4>Sem adicionais...</h4>
-        {/each}
-        <br>
-        <br>
-
-        <br>
-
-        <hr>
-    </div>
-
-    <div class="output">
-        <div class="spliter">
-            <div class="outputContainer">
-                <h3>Preço total :</h3>
-                    <p>
-                        Total =
-                        <span class="highlight total"> R$ {(
-                            (info?.totalPrice || 0) +
-                            (info?.tintasPrice || 0) + 
-                            (info?.adicionaisPrice || 0)
-                        )?.toFixed(2)}</span>
-                    </p>
-                    
-                    {#if info?.totalPrice}
-                    <p class="metalon">
-                        <span class="highlight">Metalon</span>
-                        =
-                        <span class="highlight price">R$ {info?.totalPrice?.toFixed(2)}</span>
-                    </p>
-                    {/if}
-
-                    {#if info?.tintasPrice}
-                    <p class="tintas">
-                        <span class="highlight">Tintas</span>
-                        =
-                        <span class="highlight price">R$ {info?.tintasPrice?.toFixed(2)}</span>
-                    </p>
-                    {/if}
-
-                    {#if info?.adicionaisPrice}
-                    {#each adicionais as item}
-                        <p  class:madeira={item.name.toLowerCase().includes("madeira")}
-                            class:metalon={item.name.toLowerCase().includes("metalon")}
-                            class="adicionais">
-                            +
-                            <span class="highlight">{item.name}</span>
-                            =
-                            <span class="highlight price">R$ {(item.price || 0).toFixed(2)}</span>
+    
+            <hr>
+        </div>
+    
+        <div class="output">
+            <div class="spliter">
+                <div class="outputContainer">
+                    <h3>Preço total :</h3>
+                        <p>
+                            Total =
+                            <span class="highlight total"> R$ {(
+                                (info?.totalPrice || 0) +
+                                (info?.tintasPrice || 0) + 
+                                (info?.adicionaisPrice || 0)
+                            )?.toFixed(2)}</span>
                         </p>
                         
-                    {/each}
-                    {/if}
-                    
-
-                <div class="outputContainer">
-                    <h3>Notas : </h3>
-                    <p>
-                        <textarea placeholder="Notas gerais sobre o orcamento..."
-                            readonly={!inputAreaVisible}
-                            style:resize={inputAreaVisible ? "vertical" : "none"}
-                            bind:value={orderNotes}
-                            on:input={notesTextareaChange}
-                            bind:this={notesTextarea}></textarea>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div> 
-    
-    <hr>
-
-
-    <div class="output">
-
-        {#if info.sum != undefined}
-            <div class="spliter">
-
-                <div class="outputContainer">
-                    <h3>Preço Metalon :</h3>
-                    <p class="metalon">
-                        Total =
-                        <span class="highlight total"> R$ {info?.totalPrice?.toFixed(2)}</span>
-                    </p>
-                    {#each info.sum as {type, length}}
+                        {#if info?.totalPrice}
                         <p class="metalon">
-                            <span class="highlight">{info.metAmt.find(e=>e.type == type)?.metalons}</span>
-                            und 
-                            <span class="highlight">{type}</span> =
-                            <span class="highlight price"> R$ {(Math.ceil((length/100)/metric) * formObject["price "+type]).toFixed(2)}</span>
-                        </p>
-                    {:else}
-                        <p class="metalon"><i><small>Sem metalons...</small></i></p>
-                    {/each}
-                </div>
-
-                <div class="outputContainer">
-                    <h3> Preço Tintas : </h3>
-                    <p class="tintas">
-                        Total =
-                        <span class="highlight total"> R$ {info?.tintasPrice?.toFixed(2)}</span>
-                    </p>
-                    {#each tintas as {qnt, name, price}}
-                    <p class="tintas">
-                        <span class="highlight">{qnt}</span>
-                        und 
-                        <span class="highlight">{name}</span>
-                        =
-                        <span class="highlight price">R$ {((qnt*price) || 0).toFixed(2)}</span>
-                    </p>
-                    {:else}
-                        <p class="tintas"><i><small>Sem tintas...</small></i></p>
-                    {/each}
-                </div>
-                
-                
-                <div class="outputContainer">
-                    <h3> Adicionais : </h3>
-                    <p class="adicionais">
-                        Total =
-                        <span class="highlight total"> R$ {(info?.adicionaisPrice || 0).toFixed(2)}</span>
-                    </p>
-                    {#each adicionais as {name, price}}
-                    <p class="adicionais">
-                        <span class="highlight">{name}</span>
-                        =
-                        <span class="highlight price">R$ {(price || 0).toFixed(2)}</span>
-                    </p>
-                    {:else}
-                        <p class="adicionais"><i><small>Sem adicionais...</small></i></p>
-                    {/each}
-                </div>
-                <hr>
-            </div>
-
-
-            <div class="spliter">
-            
-                <div class="outputContainer">
-                    <h3>Soma Metalon :</h3>
-                    {#each info.sum as {type, length}}
-                        <p class="metalon">
-                            <span class="highlight">{type}</span>
+                            <span class="highlight">Metalon</span>
                             =
-                            <span class="highlight">{(length/100).toFixed(2)}m</span>
-                            |
-                            <span class="highlight">{info.metAmt.find(e=>e.type == type)?.metalons}</span>
-                            und
-                            <span class="highlight"> <small>≈ {((length/100)/metric).toFixed(2)}</small></span>
+                            <span class="highlight price">R$ {info?.totalPrice?.toFixed(2)}</span>
                         </p>
-                    {:else}
-                        <p class="metalon"><i>Aguardando dados...</i></p>
-                    {/each}
+                        {/if}
+    
+                        {#if info?.tintasPrice}
+                        <p class="tintas">
+                            <span class="highlight">Tintas</span>
+                            =
+                            <span class="highlight price">R$ {info?.tintasPrice?.toFixed(2)}</span>
+                        </p>
+                        {/if}
+    
+                        {#if info?.adicionaisPrice}
+                        {#each adicionais as item}
+                            <p  class:madeira={item.name.toLowerCase().includes("madeira")}
+                                class:metalon={item.name.toLowerCase().includes("metalon")}
+                                class="adicionais">
+                                +
+                                <span class="highlight">{item.name}</span>
+                                =
+                                <span class="highlight price">R$ {(item.price || 0).toFixed(2)}</span>
+                            </p>
+                            
+                        {/each}
+                        {/if}
+                        
+    
+                    <div class="outputContainer">
+                        <h3>Notas : </h3>
+                        <p>
+                            <textarea placeholder="Notas gerais sobre o orcamento..."
+                                readonly={!inputAreaVisible}
+                                style:resize={inputAreaVisible ? "vertical" : "none"}
+                                bind:value={orderNotes}
+                                on:input={notesTextareaChange}
+                                bind:this={notesTextarea}></textarea>
+                        </p>
+                    </div>
                 </div>
-
-                <div class="outputContainer">
-                    <h3>Lista Metalon :</h3>
-                    {#each info.sizes as {type, sizes}}
-                    {#each sizes as {qnt, length}}
-                    <p class="metalon">
-                        <span class="highlight">{qnt}</span>
-                        und =
-                        <span class="highlight">
-                            {type.split(' x ')[0]}
-                            <small>x</small>
-                            {type.split(' x ')[1]}
-                        </span>
-                        x
-                        <span class="highlight">{length}</span>
-                        cm
-                    </p>
+            </div>
+        </div> 
+        
+        <hr>
+    
+    
+        <div class="output">
+    
+            {#if info.sum != undefined}
+                <div class="spliter">
+    
+                    <div class="outputContainer">
+                        <h3>Preço Metalon :</h3>
+                        <p class="metalon">
+                            Total =
+                            <span class="highlight total"> R$ {info?.totalPrice?.toFixed(2)}</span>
+                        </p>
+                        {#each info.sum as {type, length}}
+                            <p class="metalon">
+                                <span class="highlight">{info.metAmt.find(e=>e.type == type)?.metalons}</span>
+                                und 
+                                <span class="highlight">{type}</span> =
+                                <span class="highlight price"> R$ {(Math.ceil((length/100)/metric) * formObject["price "+type]).toFixed(2)}</span>
+                            </p>
+                        {:else}
+                            <p class="metalon"><i><small>Sem metalons...</small></i></p>
+                        {/each}
+                    </div>
+    
+                    <div class="outputContainer">
+                        <h3> Preço Tintas : </h3>
+                        <p class="tintas">
+                            Total =
+                            <span class="highlight total"> R$ {info?.tintasPrice?.toFixed(2)}</span>
+                        </p>
+                        {#each tintas as {qnt, name, price}}
+                        <p class="tintas">
+                            <span class="highlight">{qnt}</span>
+                            und 
+                            <span class="highlight">{name}</span>
+                            =
+                            <span class="highlight price">R$ {((qnt*price) || 0).toFixed(2)}</span>
+                        </p>
+                        {:else}
+                            <p class="tintas"><i><small>Sem tintas...</small></i></p>
+                        {/each}
+                    </div>
                     
-                    {/each}
-                    {:else}
-                        <p class="metalon"><i>Aguardando dados...</i></p>
-                    {/each}
+                    
+                    <div class="outputContainer">
+                        <h3> Adicionais : </h3>
+                        <p class="adicionais">
+                            Total =
+                            <span class="highlight total"> R$ {(info?.adicionaisPrice || 0).toFixed(2)}</span>
+                        </p>
+                        {#each adicionais as {name, price}}
+                        <p class="adicionais">
+                            <span class="highlight">{name}</span>
+                            =
+                            <span class="highlight price">R$ {(price || 0).toFixed(2)}</span>
+                        </p>
+                        {:else}
+                            <p class="adicionais"><i><small>Sem adicionais...</small></i></p>
+                        {/each}
+                    </div>
+                    <hr>
                 </div>
-
-                <div class="outputContainer">
-                    <h3>Lista Madeira :</h3>
-                    {#each info.woodSizes as {qnt, type}}
-                    <p class="madeira">
-                        <span class="highlight">{qnt}</span>
-                        und =
-                        <span class="highlight">
-                            {type.split(' x ')[0]}
-                            <small>x</small>
-                            {type.split(' x ')[1]}
-                            <small>x</small>
-                            {type.split(' x ')[2]}
-                        </span>
-                        cm
-                    </p>
-                    {:else}
-                        <p class="madeira"><i>Aguardando dados...</i></p>
-                    {/each}
+    
+    
+                <div class="spliter">
+                
+                    <div class="outputContainer">
+                        <h3>Soma Metalon :</h3>
+                        {#each info.sum as {type, length}}
+                            <p class="metalon">
+                                <span class="highlight">{type}</span>
+                                =
+                                <span class="highlight">{(length/100).toFixed(2)}m</span>
+                                |
+                                <span class="highlight">{info.metAmt.find(e=>e.type == type)?.metalons}</span>
+                                und
+                                <span class="highlight"> <small>≈ {((length/100)/metric).toFixed(2)}</small></span>
+                            </p>
+                        {:else}
+                            <p class="metalon"><i>Aguardando dados...</i></p>
+                        {/each}
+                    </div>
+    
+                    <div class="outputContainer">
+                        <h3>Lista Metalon :</h3>
+                        {#each info.sizes as {type, sizes}}
+                        {#each sizes as {qnt, length}}
+                        <p class="metalon">
+                            <span class="highlight">{qnt}</span>
+                            und =
+                            <span class="highlight">
+                                {type.split(' x ')[0]}
+                                <small>x</small>
+                                {type.split(' x ')[1]}
+                            </span>
+                            x
+                            <span class="highlight">{length}</span>
+                            cm
+                        </p>
+                        
+                        {/each}
+                        {:else}
+                            <p class="metalon"><i>Aguardando dados...</i></p>
+                        {/each}
+                    </div>
+    
+                    <div class="outputContainer">
+                        <h3>Lista Madeira :</h3>
+                        {#each info.woodSizes as {qnt, type}}
+                        <p class="madeira">
+                            <span class="highlight">{qnt}</span>
+                            und =
+                            <span class="highlight">
+                                {type.split(' x ')[0]}
+                                <small>x</small>
+                                {type.split(' x ')[1]}
+                                <small>x</small>
+                                {type.split(' x ')[2]}
+                            </span>
+                            cm
+                        </p>
+                        {:else}
+                            <p class="madeira"><i>Aguardando dados...</i></p>
+                        {/each}
+                    </div>
+                    
+                    <hr>                
                 </div>
                 
-                <hr>                
-            </div>
-            
-        {/if}
-
-    </div>
+            {/if}
     
-    <h4>
-        <button on:click={toggleInputArea}>
-            {inputAreaVisible ? "Fechar" : "Abrir"} menu de entradas
-        </button>
-    </h4>
-</form>
+        </div>
+        
+        <h4>
+            <button on:click={toggleInputArea}>
+                {inputAreaVisible ? "Fechar" : "Abrir"} menu de entradas
+            </button>
+        </h4>
+    </form>
+    
+    
+    <footer>
+        <h3>Desenvolvido por:</h3>
 
+        <div class="partners">
+            <a href="https://resume.luishenrique.space/">
+                <Lhs/>
+            </a>
+            <a href="https://www.instagram.com/mr_metalurgicapnz/">
+                <Mr/>
+            </a>
+        </div>
+    </footer>
+</div>
 
 <style>
 .container * {margin: 0; padding: 0; font-family: sans-serif}
+
+.pageContainer {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background: #1c1931;
+    color: white;
+}
+
+footer .partners {
+    height: fit-content;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+    gap: 30px;
+    padding-bottom: 65px;
+}
+footer .partners a {
+    max-height: 100px;
+}
 
 
 button {
