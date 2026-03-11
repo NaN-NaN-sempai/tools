@@ -10,7 +10,7 @@
 
 <div class="output">
     <h1 class="highlight">Luis Henrique Space</h1>
-    <h2 class="highlight">Metalon OpenSCAD Lib</h2>
+    <h2 class="highlight">Metalon OpenSCAD Lib ~11/03/2026~</h2>
     <button on:click={copy}>Copiar código</button>
     <pre>{content}</pre>
 </div>

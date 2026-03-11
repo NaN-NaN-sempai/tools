@@ -95,26 +95,15 @@ function gatherInfo(str){
     let sum = [];
     let metAmt = [];
     let woodSizes = [];
+
+    let titleList = [];
+    let metalomList = [];
+    let woodList = [];
     
     
     if(str){        
-        const metalomList = [];
-        const woodList = [];
 
-        str.split("\n").filter(e=>e).forEach(e=>{
-            let split = e.slice(12,-1).split(" => ");
-
-            if (e.includes("met.")) {
-                const data = e.slice(12,-1).split(" => ");
-                metalomList.push(data);
-            } 
-            else if (e.includes("mad.")) {
-                const data = e.slice(12,-1).split(" => ");
-                woodList.push(data);
-            }
-        });
-        
-        metalomList.forEach(([type, length])=>{
+        const patternize = ([type, length], i) => {
             length = parseFloat(length);
             type = type
                 .split(' x ')
@@ -122,6 +111,29 @@ function gatherInfo(str){
                 .sort((a, b) => a - b)
                 .join(' x ');
 
+            return [type, length, i];
+        }
+
+        str.split("\n").filter(e=>e).forEach((e,i)=>{
+            let split = e.slice(12,-1).split(" => ");
+
+            if (e.includes("met.")) {
+                const data = e.slice(12,-1).split(" => ");
+                const patternized = patternize(data, i);
+                metalomList.push(patternized);
+            } 
+            else if (e.includes("mad.")) {
+                const data = e.slice(12,-1).split(" => ");
+                const patternized = patternize(data, i);
+                woodList.push(patternized);
+            }
+            else if (e.includes("title.")) {
+                const data = e.slice(13,-1)
+                titleList.push([data, i]);
+            }
+        });
+        
+        metalomList.forEach(([type, length])=>{
             let typeQuery = sizes.find(e=>e.type == type);
 
             if(!typeQuery) sizes.push({type, sizes: [],
@@ -172,23 +184,20 @@ function gatherInfo(str){
         });
         
         woodList.forEach(([type, length])=>{
-            length = parseFloat(length);
-            type = type
-                .split(' x ')
-                .map(Number)
-                .sort((a, b) => a - b)
-                .join(' x ');
-
             let typeQuery = woodSizes.find(e=>e.type == type);
 
             if(!typeQuery) woodSizes.push({type, qnt: 1});
             else typeQuery.qnt += 1;                
         });
     } else {
-        sizes = info.sizes;
-        sum = info.sum;
-        metAmt = info.metAmt;
-        woodSizes = info.woodSizes;        
+        sizes = info.sizes || [];
+        sum = info.sum || [];
+        metAmt = info.metAmt || [];
+        woodSizes = info.woodSizes || [];   
+
+        titleList = info.titleList || [];
+        metalomList = info.metalomList || [];
+        woodList = info.woodList || [];
     }
     
     
@@ -209,11 +218,13 @@ function gatherInfo(str){
 
     return {
         sum, metAmt, sizes, woodSizes, tintasPrice, adicionaisPrice,
+        titleList, metalomList, woodList,
     }
 
 }
 
 
+let expandList = false;
 
 const toggleInputArea = () => {
     inputAreaVisible = !inputAreaVisible;
@@ -690,6 +701,48 @@ onMount(() => {
             {/if}
     
         </div>
+
+        <hr>
+
+        <div class="output">
+            
+            {#if info.sum != undefined}
+                <div class="spliter">
+                    <div class="outputContainer">
+                        <h3>Lista detalhada :</h3>
+                        <p><button on:click={() => expandList = !expandList}>{expandList ? "Recolher" : "Expandir"} Lista</button> </p>
+                        <div style:display={expandList ? "block" : "none"}>
+                            {#each [...(info?.metalomList || []), ...(info?.woodList || []), ...(info?.titleList || [])].sort((a, b) => a[a.length - 1] - b[b.length - 1]) as item}
+                                {#if item.length == 3}      
+                                    <p
+                                        class:metalon={item[0].split(" x ").length == 2}
+                                        class:madeira={item[0].split(" x ").length == 3}
+                                    >
+                                        <span class="highlight">
+                                            {item[0].split(" x ").length == 2 ? "Metalon" : "Madeira"}
+                                        </span>
+                                        :
+                                        <span class="highlight">
+                                            {item[0]}
+                                        </span>
+                                        cm
+                                    </p>
+                                {:else}
+                                    <p class="title">
+                                        Titulo: <span class="highlight">{item[0]}</span>
+                                    </p>
+                                {/if}
+                            {:else}
+                                <p>
+                                    lista não encontrada
+                                </p>
+                            {/each}
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+            {/if}
+        </div>
         
         <h4>
             <button on:click={toggleInputArea}>
@@ -742,6 +795,13 @@ footer .partners {
 }
 footer .partners a {
     max-height: 100px;
+    background: transparent;
+    border-radius: 5px;
+    padding: 5px;
+    transition: .2s;
+}
+footer .partners a:hover {
+    background: #fff2;
 }
 
 
@@ -759,6 +819,14 @@ button {
 .output p.metalon {
     background: rgba(0, 0, 0, 0.48);
     color: white;
+}
+
+.output p.title {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+}
+.output p.title .highlight {
+    color: black;
 }
 
 .output p.tintas {
