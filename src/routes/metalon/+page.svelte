@@ -435,6 +435,20 @@
         
     }
 
+    const print = () => {
+        let setInptarea = false;
+        if(inputAreaVisible){
+             inputAreaVisible = false;
+             setInptarea = true;
+        }
+        setTimeout(() => {
+
+            window.print();
+
+            if(setInptarea) inputAreaVisible = true;
+        }, 200)
+    }
+
     let inputAreaVisible = true;
     let displayLists = false;
     let expandList = false;
@@ -492,6 +506,7 @@
             
             <h4>
                 <button on:click={shareOrder}>compartilhar</button>
+                <button on:click={print}>Imprimir</button>
             </h4>
     
             <br><br>
@@ -515,6 +530,10 @@
     
             <label> Compartilhar Orçamento :
                 <button on:click={shareOrder}>compartilhar</button>
+            </label>
+            <br>
+            <label> Imprimir Orçamento :
+                <button on:click={print}>Imprimir</button>
             </label>
             <br><hr>
     
@@ -871,9 +890,9 @@
 
                     <div class="outputContainer">
                         <p>
-                    <button on:click={toggleInputArea}>
-                        {inputAreaVisible ? "Recolher" : "Expandir"} menu de entradas
-                    </button>
+                            <button on:click={toggleInputArea}>
+                                {inputAreaVisible ? "Recolher" : "Expandir"} menu de entradas
+                            </button>
                         </p>
                     </div>
                 </div>  
@@ -1059,6 +1078,27 @@ hr {
         flex-direction: column;
         gap: 0;
     }    
-    
+}
+
+@media print {
+    footer h3,
+    button,
+    p:has(button),
+    hr {
+        display: none;
+    }
+
+    footer {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        
+    }
+    footer .partners {
+        padding: 10px;
+    }
+    .container {
+        margin-top: 100px;
+    }
 }
 </style>
