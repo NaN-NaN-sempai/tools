@@ -8,390 +8,389 @@
     export let data;
     
 
-let input;
-let metric = 6;
-let price;
+    let input;
+    let metric = 6;
+    let price;
 
-let info = {};
-let list = [];
+    let info = {};
+    let list = [];
 
-let met = [];
-let metaQnt = [];
-let metaQntCeil = [];
+    let met = [];
+    let metaQnt = [];
+    let metaQntCeil = [];
 
-let pric = [];
+    let pric = [];
 
-const savedPrices = {
-    "2 x 2": 40,
-};
-
-
-let form;
-let formObject = {};
-
-async function displayInfo(infoObj){
-    formObject = Object.fromEntries(new FormData(form));
-
-    info = infoObj?.sizes !== undefined ? infoObj : gatherInfo(input.value);
-
-    console.log(info);
-    
-
-    await tick();
-    
-    notesTextareaChange();
-    
-    formObject = Object.fromEntries(new FormData(form));
-
-    info.totalPrice = 0;
-    info.sum?.forEach((e,i)=>{
-        const price = formObject["price "+e.type] || info.sizes[i]?.price || 0;
-        const qnt = Math.ceil((e.length/100)/6);
-        info.totalPrice += price * qnt;
-    });
-}
-
-
-let useCuttingStock = false;
-function cuttingStockMetalon(pieces) {
-    let allPieces = [];
-    pieces.forEach(p => {
-        for(let i=0;i<p.qnt;i++) allPieces.push(p.length);
-    });
-
-    allPieces.sort((a,b)=>b-a);
-
-    let minMetalons = allPieces.length;
-
-    function search(index, bins) {
-        if(index === allPieces.length){
-            minMetalons = Math.min(minMetalons, bins.length);
-            return;
-        }
-
-        const piece = allPieces[index];
-
-        for(let i=0;i<bins.length;i++){
-            if(bins[i] + piece <= metric * 100){
-                bins[i] += piece;
-                search(index+1, bins);
-                bins[i] -= piece;
-            }
-        }
-
-        bins.push(piece);
-        search(index+1, bins);
-        bins.pop();
-    }
-
-    search(0, []);
-
-    return minMetalons;
-}
-
-function gatherInfo(str){
-
-    let sizes =[];
-    let sum = [];
-    let metAmt = [];
-    let woodSizes = [];
-
-    let titleList = [];
-    let metalomList = [];
-    let woodList = [];
-    
-    
-    if(str){        
-
-        const patternize = ([type, length], i) => {
-            length = parseFloat(length);
-            type = type
-                .split(' x ')
-                .map(Number)
-                .sort((a, b) => a - b)
-                .join(' x ');
-
-            return [type, length, i];
-        }
-
-        str.split("\n").filter(e=>e).forEach((e,i)=>{
-            let split = e.slice(12,-1).split(" => ");
-
-            if (e.includes("met.")) {
-                const data = e.slice(12,-1).split(" => ");
-                const patternized = patternize(data, i);
-                metalomList.push(patternized);
-            } 
-            else if (e.includes("mad.")) {
-                const data = e.slice(12,-1).split(" => ");
-                const patternized = patternize(data, i);
-                woodList.push(patternized);
-            }
-            else if (e.includes("title.")) {
-                const data = e.slice(13,-1)
-                titleList.push([data, i]);
-            }
-        });
-        
-        metalomList.forEach(([type, length])=>{
-            let typeQuery = sizes.find(e=>e.type == type);
-
-            if(!typeQuery) sizes.push({type, sizes: [],
-                price: formObject["price "+type] || savedPrices[type] || savedPrices["2 x 2"]});
-
-            const item = sizes.find(e=>e.type == type);
-            const query = item.sizes.find(e=>e.length == length);
-            
-            if(query) query.qnt += 1;
-            else item.sizes.push({qnt: 1, length});
-        });
-
-        sizes.forEach(e=>{
-            let total = 0;
-            
-            e.sizes.forEach(e=>total += e.qnt * e.length);
-            sum.push({type: e.type, length: total});
-        });
-        
-        metAmt = useCuttingStock?
-        sizes.map(e => ({
-            type: e.type,
-            metalons: cuttingStockMetalon(e.sizes)
-        })) :
-        sizes.map(e => {
-            let allPieces = [];
-            e.sizes.forEach(s => {
-                for(let i = 0; i < s.qnt; i++) allPieces.push(s.length);
-            });
-            
-            allPieces.sort((a,b) => b-a);
-
-            let metalons = [];
-
-            allPieces.forEach(p => {
-                let placed = false;
-                for(let i=0; i<metalons.length; i++){
-                    if(metalons[i] + p <= metric * 100){
-                        metalons[i] += p;
-                        placed = true;
-                        break;
-                    }
-                }
-                if(!placed) metalons.push(p);
-            });
-            
-            return { type: e.type, metalons: metalons.length };
-        });
-        
-        woodList.forEach(([type, length])=>{
-            let typeQuery = woodSizes.find(e=>e.type == type);
-
-            if(!typeQuery) woodSizes.push({type, qnt: 1});
-            else typeQuery.qnt += 1;                
-        });
-    } else {
-        sizes = info.sizes || [];
-        sum = info.sum || [];
-        metAmt = info.metAmt || [];
-        woodSizes = info.woodSizes || [];   
-
-        titleList = info.titleList || [];
-        metalomList = info.metalomList || [];
-        woodList = info.woodList || [];
-    }
-    
-    
-
-
-
-
-    let tintasPrice = 0;
-
-    (tintas || []).forEach(e=>{
-        tintasPrice += e.price * e.qnt;
-    });
-
-    let adicionaisPrice = 0;
-    (adicionais || []).forEach(e=>{
-        adicionaisPrice += e.price;
-    });
-
-    return {
-        sum, metAmt, sizes, woodSizes, tintasPrice, adicionaisPrice,
-        titleList, metalomList, woodList,
-    }
-
-}
-
-
-let expandList = false;
-
-const toggleInputArea = () => {
-    inputAreaVisible = !inputAreaVisible;
-    window.scrollTo(0, 0);
-}
-
-
-let tintas = [
-    {
-        name: "Preto Fosco",
-        qnt: 1,
-        price: 100
-    }
-];
-const addTinta = () => {
-    tintas.push({
-        name: "Preto Fosco",
-        qnt: 1,
-        price: 100
-    });
-
-    displayInfo();
-
-    tintas = tintas;   
-}
-const removeTinta = (index) => {
-    tintas.splice(index, 1);
-    tintas = tintas;
-
-    displayInfo();
-}
-
-
-let adicionais = [];
-let adicionaisCounter = 0;
-const addAdicional = () => {
-    let c = adicionaisCounter++;
-
-    adicionais.push({
-        name: "Mão de obra" + (c? " " + c : ""),
-        price: 100
-    });
-
-    displayInfo();
-
-    adicionais = adicionais;   
-}
-const removeAdicional = (index) => {
-    adicionais.splice(index, 1);
-    adicionais = adicionais;
-
-    displayInfo();
-}
-
-
-let orderNotes = "";
-let notesTextarea;
-const notesTextareaChange = () => {    
-    notesTextarea.style.height = "auto";
-    notesTextarea.style.height = notesTextarea.scrollHeight + 3 + "px";
-}
-
-
-let infoName;
-let savedOrders = [];
-const gatherOrder = () => {
-    return {
-        info,
-        tintas,
-        name: infoName.value,
-        notes: orderNotes,
-        adicionais,
-        metric
+    const savedPrices = {
+        "2 x 2": 40,
     };
-}
-const saveOrder = () => {
-    const saveObj = gatherOrder();
-    
-    savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
 
-    if(!infoName.value){
-        return alert("Insira um nome para o orçamento!");
+
+    let form;
+    let formObject = {};
+
+    async function displayInfo(infoObj){
+        formObject = Object.fromEntries(new FormData(form));
+
+        info = infoObj?.sizes !== undefined ? infoObj : gatherInfo(input.value);
+
+        console.log(info);
+        
+
+        await tick();
+        
+        notesTextareaChange();
+        
+        formObject = Object.fromEntries(new FormData(form));
+
+        info.totalPrice = 0;
+        info.sum?.forEach((e,i)=>{
+            const price = formObject["price "+e.type] || info.sizes[i]?.price || 0;
+            const qnt = Math.ceil((e.length/100)/6);
+            info.totalPrice += price * qnt;
+        });
     }
 
-    if(savedOrders.find(e=>e.name == infoName.value)){
-        savedOrders = savedOrders.map(e=>{
-            if(e.name == infoName.value) return saveObj;
-            return e;
+
+    let useCuttingStock = false;
+    function cuttingStockMetalon(pieces) {
+        let allPieces = [];
+        pieces.forEach(p => {
+            for(let i=0;i<p.qnt;i++) allPieces.push(p.length);
         });
 
-        alert("Orçamento '" + infoName.value + "' atualizado com sucesso!");
+        allPieces.sort((a,b)=>b-a);
 
-    } else {
-        savedOrders.push(saveObj);
+        let minMetalons = allPieces.length;
 
-        alert("Orçamento '" + infoName.value + "' salvo com sucesso!");
+        function search(index, bins) {
+            if(index === allPieces.length){
+                minMetalons = Math.min(minMetalons, bins.length);
+                return;
+            }
+
+            const piece = allPieces[index];
+
+            for(let i=0;i<bins.length;i++){
+                if(bins[i] + piece <= metric * 100){
+                    bins[i] += piece;
+                    search(index+1, bins);
+                    bins[i] -= piece;
+                }
+            }
+
+            bins.push(piece);
+            search(index+1, bins);
+            bins.pop();
+        }
+
+        search(0, []);
+
+        return minMetalons;
     }
 
-    localStorage.setItem("savedOrders", JSON.stringify(savedOrders));
+    function gatherInfo(str){
 
-    window.location.search = `order=${infoName.value}`;
-}
-const loadOrderObj = obj => {
-    info = obj.info;
-    tintas = obj.tintas;
-    infoName.value = obj.name;
-    adicionais = obj.adicionais;
-    metric = obj.metric;
-    orderNotes = obj.notes;
+        let sizes =[];
+        let sum = [];
+        let metAmt = [];
+        let woodSizes = [];
 
-    displayInfo(obj.info);
-
-    const url = new URL(window.location);
-    url.searchParams.set("order", obj.name);
-
-    window.history.replaceState({}, "", url);
-}
-
-const loadOrder = (e) => {
-    let localSave = JSON.parse(localStorage.getItem("savedOrders") || "[]");
-
-    const order = localSave[e.target.value];
-
-    if(!order) return alert("Nenhum orçamento encontrado!");
-
-    loadOrderObj(order);
-}
-
-const shareOrder = () => {
-    const obj = gatherOrder();
-
-    const totalValue = 
-        (info?.totalPrice || 0) +
-        (info?.tintasPrice || 0) + 
-        (info?.adicionaisPrice || 0);
-
-    navigator.share({
-        title: "Luís Henrique Space - Tools | Orçamento Metalon",
-        url: window.location.href.split("?")[0] + `?shared=${LZString.compressToEncodedURIComponent(JSON.stringify(obj))}&name=${obj.name}&value=${totalValue}`
-    })
-    
-}
-
-let inputAreaVisible = true;
-let displayLists = true;
-onMount(() => {
-    savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
-    
-    // get search
-    const urlParams = new URLSearchParams(window.location.search);
-    const order = urlParams.get("order");
-    const shared = urlParams.get("shared");
-
-    inputAreaVisible = false;
-
-    let query;
-    if(shared) {
-        query = JSON.parse(LZString.decompressFromEncodedURIComponent(shared));
+        let titleList = [];
+        let metalomList = [];
+        let woodList = [];
         
-    } else {
-        query = savedOrders.find(e=>e.name == order);
+        
+        if(str){        
+
+            const patternize = ([type, length], i) => {
+                length = parseFloat(length);
+                type = type
+                    .split(' x ')
+                    .map(Number)
+                    .sort((a, b) => a - b)
+                    .join(' x ');
+
+                return [type, length, i];
+            }
+
+            str.split("\n").filter(e=>e).forEach((e,i)=>{
+                let split = e.slice(12,-1).split(" => ");
+
+                if (e.includes("met.")) {
+                    const data = e.slice(12,-1).split(" => ");
+                    const patternized = patternize(data, i);
+                    metalomList.push(patternized);
+                } 
+                else if (e.includes("mad.")) {
+                    const data = e.slice(12,-1).split(" => ");
+                    const patternized = patternize(data, i);
+                    woodList.push(patternized);
+                }
+                else if (e.includes("title.")) {
+                    const data = e.slice(13,-1)
+                    titleList.push([data, i]);
+                }
+            });
+            
+            metalomList.forEach(([type, length])=>{
+                let typeQuery = sizes.find(e=>e.type == type);
+
+                if(!typeQuery) sizes.push({type, sizes: [],
+                    price: formObject["price "+type] || savedPrices[type] || savedPrices["2 x 2"]});
+
+                const item = sizes.find(e=>e.type == type);
+                const query = item.sizes.find(e=>e.length == length);
+                
+                if(query) query.qnt += 1;
+                else item.sizes.push({qnt: 1, length});
+            });
+
+            sizes.forEach(e=>{
+                let total = 0;
+                
+                e.sizes.forEach(e=>total += e.qnt * e.length);
+                sum.push({type: e.type, length: total});
+            });
+            
+            metAmt = useCuttingStock?
+            sizes.map(e => ({
+                type: e.type,
+                metalons: cuttingStockMetalon(e.sizes)
+            })) :
+            sizes.map(e => {
+                let allPieces = [];
+                e.sizes.forEach(s => {
+                    for(let i = 0; i < s.qnt; i++) allPieces.push(s.length);
+                });
+                
+                allPieces.sort((a,b) => b-a);
+
+                let metalons = [];
+
+                allPieces.forEach(p => {
+                    let placed = false;
+                    for(let i=0; i<metalons.length; i++){
+                        if(metalons[i] + p <= metric * 100){
+                            metalons[i] += p;
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if(!placed) metalons.push(p);
+                });
+                
+                return { type: e.type, metalons: metalons.length };
+            });
+            
+            woodList.forEach(([type, length])=>{
+                let typeQuery = woodSizes.find(e=>e.type == type);
+
+                if(!typeQuery) woodSizes.push({type, qnt: 1});
+                else typeQuery.qnt += 1;                
+            });
+        } else {
+            sizes = info.sizes || [];
+            sum = info.sum || [];
+            metAmt = info.metAmt || [];
+            woodSizes = info.woodSizes || [];   
+
+            titleList = info.titleList || [];
+            metalomList = info.metalomList || [];
+            woodList = info.woodList || [];
+        }
+        
+        
+
+
+
+
+        let tintasPrice = 0;
+
+        (tintas || []).forEach(e=>{
+            tintasPrice += e.price * e.qnt;
+        });
+
+        let adicionaisPrice = 0;
+        (adicionais || []).forEach(e=>{
+            adicionaisPrice += e.price;
+        });
+
+        return {
+            sum, metAmt, sizes, woodSizes, tintasPrice, adicionaisPrice,
+            titleList, metalomList, woodList,
+        }
+
     }
 
-    if(!query) return inputAreaVisible = true;
 
-    loadOrderObj(query);
-});
+    const toggleInputArea = () => {
+        inputAreaVisible = !inputAreaVisible;
+        window.scrollTo(0, 0);
+    }
+
+
+    let tintas = [
+        {
+            name: "Preto Fosco",
+            qnt: 1,
+            price: 100
+        }
+    ];
+    const addTinta = () => {
+        tintas.push({
+            name: "Preto Fosco",
+            qnt: 1,
+            price: 100
+        });
+
+        displayInfo();
+
+        tintas = tintas;   
+    }
+    const removeTinta = (index) => {
+        tintas.splice(index, 1);
+        tintas = tintas;
+
+        displayInfo();
+    }
+
+
+    let adicionais = [];
+    let adicionaisCounter = 0;
+    const addAdicional = () => {
+        let c = adicionaisCounter++;
+
+        adicionais.push({
+            name: "Mão de obra" + (c? " " + c : ""),
+            price: 100
+        });
+
+        displayInfo();
+
+        adicionais = adicionais;   
+    }
+    const removeAdicional = (index) => {
+        adicionais.splice(index, 1);
+        adicionais = adicionais;
+
+        displayInfo();
+    }
+
+
+    let orderNotes = "";
+    let notesTextarea;
+    const notesTextareaChange = () => {    
+        notesTextarea.style.height = "auto";
+        notesTextarea.style.height = notesTextarea.scrollHeight + 3 + "px";
+    }
+
+
+    let infoName;
+    let savedOrders = [];
+    const gatherOrder = () => {
+        return {
+            info,
+            tintas,
+            name: infoName.value,
+            notes: orderNotes,
+            adicionais,
+            metric
+        };
+    }
+    const saveOrder = () => {
+        const saveObj = gatherOrder();
+        
+        savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
+
+        if(!infoName.value){
+            return alert("Insira um nome para o orçamento!");
+        }
+
+        if(savedOrders.find(e=>e.name == infoName.value)){
+            savedOrders = savedOrders.map(e=>{
+                if(e.name == infoName.value) return saveObj;
+                return e;
+            });
+
+            alert("Orçamento '" + infoName.value + "' atualizado com sucesso!");
+
+        } else {
+            savedOrders.push(saveObj);
+
+            alert("Orçamento '" + infoName.value + "' salvo com sucesso!");
+        }
+
+        localStorage.setItem("savedOrders", JSON.stringify(savedOrders));
+
+        window.location.search = `order=${infoName.value}`;
+    }
+    const loadOrderObj = obj => {
+        info = obj.info;
+        tintas = obj.tintas;
+        infoName.value = obj.name;
+        adicionais = obj.adicionais;
+        metric = obj.metric;
+        orderNotes = obj.notes;
+
+        displayInfo(obj.info);
+
+        const url = new URL(window.location);
+        url.searchParams.set("order", obj.name);
+
+        window.history.replaceState({}, "", url);
+    }
+
+    const loadOrder = (e) => {
+        let localSave = JSON.parse(localStorage.getItem("savedOrders") || "[]");
+
+        const order = localSave[e.target.value];
+
+        if(!order) return alert("Nenhum orçamento encontrado!");
+
+        loadOrderObj(order);
+    }
+
+    const shareOrder = () => {
+        const obj = gatherOrder();
+
+        const totalValue = 
+            (info?.totalPrice || 0) +
+            (info?.tintasPrice || 0) + 
+            (info?.adicionaisPrice || 0);
+
+        navigator.share({
+            title: "Luís Henrique Space - Tools | Orçamento Metalon",
+            url: window.location.href.split("?")[0] + `?shared=${LZString.compressToEncodedURIComponent(JSON.stringify(obj))}&name=${obj.name}&value=${totalValue}`
+        })
+        
+    }
+
+    let inputAreaVisible = true;
+    let displayLists = false;
+    let expandList = false;
+    onMount(() => {
+        savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
+        
+        // get search
+        const urlParams = new URLSearchParams(window.location.search);
+        const order = urlParams.get("order");
+        const shared = urlParams.get("shared");
+
+        inputAreaVisible = false;
+
+        let query;
+        if(shared) {
+            query = JSON.parse(LZString.decompressFromEncodedURIComponent(shared));
+            
+        } else {
+            query = savedOrders.find(e=>e.name == order);
+        }
+
+        if(!query) return inputAreaVisible = true;
+
+        loadOrderObj(query);
+    });
 </script>
 
 
@@ -647,7 +646,7 @@ onMount(() => {
 
                     <div class="outputContainer">
                         
-                        <h2>Listas Simples :</h2>
+                        <h3>Listas Simples :</h3>
                         <p>
                             <button on:click={() => displayLists = false}>Recolher Listas</button>
                         </p>
@@ -743,6 +742,12 @@ onMount(() => {
                                         <span class="highlight">
                                             {item[0]}
                                         </span>
+                                        {#if item[1]}
+                                            x
+                                            <span class="highlight">
+                                                {item[1]}
+                                            </span>    
+                                        {/if}
                                         cm
                                     </p>
                                 {:else}
@@ -757,16 +762,24 @@ onMount(() => {
                             {/each}
                         </div>
                     </div>
-                    <hr>
                 </div>
             {/if}
         </div>
-        
-        <h4>
-            <button on:click={toggleInputArea}>
-                {inputAreaVisible ? "Fechar" : "Abrir"} menu de entradas
-            </button>
-        </h4>
+            
+        <hr>
+        <div class="output">
+            
+                <div class="spliter">
+
+                    <div class="outputContainer">
+                        <p>
+                    <button on:click={toggleInputArea}>
+                        {inputAreaVisible ? "Recolher" : "Expandir"} menu de entradas
+                    </button>
+                        </p>
+                    </div>
+                </div>  
+        </div>
     </form>
     
     
