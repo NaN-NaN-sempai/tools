@@ -32,7 +32,9 @@
     async function displayInfo(infoObj){
         formObject = Object.fromEntries(new FormData(form));
 
-        info = infoObj?.sizes !== undefined ? infoObj : gatherInfo(input.value);
+        info = infoObj?.sizes !== undefined ?
+            infoObj :
+            gatherInfo(typeof infoObj == "string" ? infoObj : input.value);
 
         console.log(info);
         
@@ -370,13 +372,24 @@
     let displayLists = false;
     let expandList = false;
     onMount(() => {
-        savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
-        
-        // get search
         const urlParams = new URLSearchParams(window.location.search);
         const order = urlParams.get("order");
         const shared = urlParams.get("shared");
+        const overwrite = urlParams.get("overwrite");
 
+        if(overwrite){
+            const text = decodeURI(overwrite);
+
+            console.log(text);
+            
+
+            return displayInfo(text);
+        }
+
+
+
+        savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
+        
         inputAreaVisible = false;
 
         let query;
