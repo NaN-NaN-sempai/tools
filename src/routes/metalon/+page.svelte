@@ -369,6 +369,7 @@ const shareOrder = () => {
 }
 
 let inputAreaVisible = true;
+let displayLists = true;
 onMount(() => {
     savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
     
@@ -570,8 +571,10 @@ onMount(() => {
         <hr>
     
     
-        <div class="output">
-    
+
+        <div class="output"
+        >
+
             {#if info.sum != undefined}
                 <div class="spliter">
     
@@ -630,10 +633,26 @@ onMount(() => {
                         {/each}
                     </div>
                     <hr>
+                    <div class="outputContainer" class:hidden={displayLists}>
+
+                        <h3>Listas Simples :</h3>
+                        <p>
+                            <button on:click={() => displayLists = true}>Expandir Listas</button>
+                        </p>
+                    </div>
                 </div>
     
-    
-                <div class="spliter">
+                <div class="spliter"
+                    class:hidden={!displayLists}>
+
+                    <div class="outputContainer">
+                        
+                        <h2>Listas Simples :</h2>
+                        <p>
+                            <button on:click={() => displayLists = false}>Recolher Listas</button>
+                        </p>
+                    </div>
+
                 
                     <div class="outputContainer">
                         <h3>Soma Metalon :</h3>
@@ -705,7 +724,6 @@ onMount(() => {
         <hr>
 
         <div class="output">
-            
             {#if info.sum != undefined}
                 <div class="spliter">
                     <div class="outputContainer">
@@ -768,6 +786,10 @@ onMount(() => {
 
 <style>
 .container * {margin: 0; padding: 0; font-family: sans-serif}
+
+.spliter.hidden, .outputContainer.hidden {
+    display: none;
+}
 
 .pageContainer {
     box-sizing: border-box;
