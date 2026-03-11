@@ -42,6 +42,8 @@
         await tick();
         
         notesTextareaChange();
+
+        countUntilNext();
         
         formObject = Object.fromEntries(new FormData(form));
 
@@ -53,6 +55,64 @@
         });
     }
 
+    let detailedListMini = [];
+    let detailedList = [];
+    const countUntilNext = () => {
+        detailedList = [];
+        let auxList = [];
+
+        const add = (item, query) => {
+            detailedList.push(item);
+
+            if(query) query.qnt += 1;
+            else auxList.push(item);
+        }
+
+        [...(info?.metalomList || []), ...(info?.woodList || []), ...(info?.titleList || [])]
+        .sort((a, b) => a[a.length - 1] - b[b.length - 1])
+        .forEach(item => {
+            if(item.length == 2) {
+                detailedListMini = [...detailedListMini, ...auxList];
+                auxList = [];
+
+                const obj = {
+                    text: item[0],
+                    type: "title",
+                };
+
+                detailedList.push(obj);
+                detailedListMini.push(obj);
+
+            } else if(item[0].split(" x ").length == 2) {
+                const query = auxList.find(e=> 
+                    e.type == "metalon" &&
+                    e.dimension == item[0] &&
+                    e.length == item[1]
+                );
+
+                add({
+                    dimension: item[0],
+                    length: item[1],
+                    qnt: 1,
+                    type: "metalon"
+                }, query);
+
+            } else {
+                const query = auxList.find(e=> 
+                    e.type == "madeira" &&
+                    e.dimension == item[0]
+                );
+
+                add({
+                    dimension: item[0],
+                    qnt: 1,
+                    type: "madeira"
+                }, query);
+            }
+        });
+
+        if(auxList.length) detailedListMini = [...detailedListMini, ...auxList];
+    }
 
     let useCuttingStock = false;
     function cuttingStockMetalon(pieces) {
@@ -371,6 +431,7 @@
     let inputAreaVisible = true;
     let displayLists = false;
     let expandList = false;
+    let minimizeDetailedList = true;
     onMount(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const order = urlParams.get("order");
@@ -740,32 +801,48 @@
                 <div class="spliter">
                     <div class="outputContainer">
                         <h3>Lista detalhada :</h3>
-                        <p><button on:click={() => expandList = !expandList}>{expandList ? "Recolher" : "Expandir"} Lista</button> </p>
+                        <p>
+                            <button on:click={() => expandList = !expandList}>
+                                {expandList ? "Recolher" : "Expandir"} Lista
+                            </button>
+
+                            {#if expandList }
+                                <button on:click={() => minimizeDetailedList = !minimizeDetailedList}>
+                                    {minimizeDetailedList ? "☰" : "∑"}
+                                </button>
+                            {/if}
+                        </p>
                         <div style:display={expandList ? "block" : "none"}>
-                            {#each [...(info?.metalomList || []), ...(info?.woodList || []), ...(info?.titleList || [])].sort((a, b) => a[a.length - 1] - b[b.length - 1]) as item}
-                                {#if item.length == 3}      
+                            {#each minimizeDetailedList ? detailedListMini : detailedList as item}
+                                {#if item.type != "title"}      
                                     <p
-                                        class:metalon={item[0].split(" x ").length == 2}
-                                        class:madeira={item[0].split(" x ").length == 3}
+                                        class:metalon={item.type == "metalon"}
+                                        class:madeira={item.type == "madeira"}
                                     >
+                                        {#if minimizeDetailedList}
+                                        <small class="highlight">
+                                            {item.qnt}
+                                        </small>
+                                        -
+                                        {/if}
                                         <span class="highlight">
-                                            {item[0].split(" x ").length == 2 ? "Metalon" : "Madeira"}
+                                            {item.type == "metalon" ? "Metalon" : "Madeira"}
                                         </span>
                                         :
                                         <span class="highlight">
-                                            {item[0]}
+                                            {item.dimension}
                                         </span>
-                                        {#if item[1]}
+                                        {#if item.type == "metalon"}
                                             x
                                             <span class="highlight">
-                                                {item[1]}
+                                                {item.length}
                                             </span>    
                                         {/if}
                                         cm
                                     </p>
                                 {:else}
                                     <p class="title">
-                                        Titulo: <span class="highlight">{item[0]}</span>
+                                        Titulo: <span class="highlight">{item.text}</span>
                                     </p>
                                 {/if}
                             {:else}
@@ -774,6 +851,7 @@
                                 </p>
                             {/each}
                         </div>
+                        
                     </div>
                 </div>
             {/if}
