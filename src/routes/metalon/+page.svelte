@@ -486,6 +486,19 @@
 
         loadOrderObj(query);
     });
+
+
+    const orderMadeira = () => {
+        const number = "+55 74 8116-4671";
+
+        const listStr = info.woodSizes.map(({type, qnt}, i) => 
+            `- *${qnt}* und : \`${type} cm\``
+        ).join("\n");
+
+        const message = "> *Orçamento de madeira*:\n" + listStr;
+
+        window.open(`https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(message)}`);
+    }
 </script>
 
 
@@ -795,6 +808,11 @@
     
                     <div class="outputContainer">
                         <h3>Lista Madeira :</h3>
+                        {#if info.woodSizes && inputAreaVisible }
+                            <p class="madeira">
+                                <button class="whatsapp" on:click={orderMadeira}>Orçar Madeiras</button>
+                            </p>
+                        {/if}
                         {#each info.woodSizes as {qnt, type}}
                         <p class="madeira">
                             <span class="highlight">{qnt}</span>
@@ -966,6 +984,18 @@ button {
     color: white;
     border: none;
     cursor: pointer;
+}
+
+button.whatsapp::before {
+    content: "\f232";
+    font-family: "Font Awesome 6 Brands";
+    margin-right: 5px;
+}
+
+button.whatsapp {
+    background: #25d366;
+    color: white;
+    border: 2px solid #fff;
 }
 
 .output p.metalon {
