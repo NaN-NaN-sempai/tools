@@ -496,10 +496,12 @@
         savedOrders = JSON.parse(localStorage.getItem("savedOrders") || "[]");
         
         inputAreaVisible = false;
+        let getFromDb = false;
 
         let query;
         if(orderdb) {
             query = await getOrderDb(orderdb);
+            getFromDb = true;
 
         } else if(shared) {
             query = JSON.parse(LZString.decompressFromEncodedURIComponent(shared));
@@ -510,7 +512,7 @@
 
         if(!query) return inputAreaVisible = true;
 
-        loadOrderObj(query);
+        loadOrderObj(query, getFromDb);
     });
 
 
@@ -546,7 +548,6 @@
             alert("Erro ao fazer login!");
         }
     }
-    
     let superUserMenu = false;
     const saveOrderDB = async () => {
         if(!infoName.value){
@@ -611,8 +612,6 @@
 
         if(!req.ok) return alert(`Erro ao carregar orçamento "${name}" do banco de dados!`);
 
-        console.log(req);
-        
         orderdb.value = name;
 
         return req.json();
