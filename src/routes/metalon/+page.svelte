@@ -7,6 +7,7 @@
     import Mr from "./partners/mr.svelte";
     export let data;
     
+    
 
     let input;
     let metric = 6;
@@ -394,7 +395,7 @@
 
         window.location.search = `order=${infoName.value}`;
     }
-    const loadOrderObj = obj => {
+    const loadOrderObj = (obj, fromDb) => {
         info = obj.info;
         tintas = obj.tintas;
         infoName.value = obj.name;
@@ -405,7 +406,12 @@
         displayInfo(obj.info);
 
         const url = new URL(window.location);
-        url.searchParams.set("order", obj.name);
+        if(fromDb) {
+            url.search = "orderdb=" + obj.name;
+    
+        } else {
+            url.searchParams.set("order", obj.name);
+        }
 
         window.history.replaceState({}, "", url);
     }
@@ -428,9 +434,22 @@
             (info?.tintasPrice || 0) + 
             (info?.adicionaisPrice || 0);
 
+            
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderdb = urlParams.get("orderdb");
+            
+        let url = window.location.href.split("?")[0];
+        if(orderdb){
+            url += `?orderdb=${orderdb}`;
+        } else {
+            url += `?shared=${LZString.compressToEncodedURIComponent(JSON.stringify(obj))}`;
+        }
+
+        url += `&name=${obj.name}&value=${totalValue}`;
+
         navigator.share({
             title: "Luís Henrique Space - Tools | Orçamento Metalon",
-            url: window.location.href.split("?")[0] + `?shared=${LZString.compressToEncodedURIComponent(JSON.stringify(obj))}&name=${obj.name}&value=${totalValue}`
+            url
         })
         
     }
@@ -453,9 +472,10 @@
     let displayLists = false;
     let expandList = false;
     let minimizeDetailedList = true;
-    onMount(() => {
+    onMount(async () => {
         const urlParams = new URLSearchParams(window.location.search);
         const order = urlParams.get("order");
+        const orderdb = urlParams.get("orderdb");
         const shared = urlParams.get("shared");
         const overwrite = urlParams.get("overwrite");
 
@@ -475,10 +495,13 @@
         inputAreaVisible = false;
 
         let query;
-        if(shared) {
+        if(orderdb) {
+            query = await getOrderDb(orderdb);
+
+        } else if(shared) {
             query = JSON.parse(LZString.decompressFromEncodedURIComponent(shared));
-            
-        } else {
+
+        } else if(order) {
             query = savedOrders.find(e=>e.name == order);
         }
 
@@ -499,6 +522,127 @@
 
         window.open(`https://api.whatsapp.com/send?phone=${number}&text=${encodeURIComponent(message)}`);
     }
+
+
+    const loginForm = async () => {
+        const data = new FormData(form);
+
+        const user = {
+            login: data.get("login"),
+            password: data.get("password")
+        }
+
+        const res = await fetch(location.pathname + "/login", {
+            method: "POST",
+            body: JSON.stringify(user)
+        });
+
+        if(res.ok){
+            window.location.reload();
+        } else {
+            alert("Erro ao fazer login!");
+        }
+    }
+    
+    let superUserMenu = false;
+    const saveOrderDB = async () => {
+        if(!infoName.value){
+            return alert("Insira um nome para o orçamento!");
+        }
+
+        const obj = {
+            order: gatherOrder(),
+        }
+        let req;
+
+        if(data.dbData.orders.find(e=>e.name == infoName.value)){
+            obj.operation = "update-order";
+
+            obj.order.index = data.dbData.orders.findIndex(e=>e.name == infoName.value);
+
+            req = await fetch(location.pathname + "/api", {
+                method: "POST",
+                body: JSON.stringify(obj)
+            });
+
+        } else {
+            obj.operation = "save-order";
+
+            req = await fetch(location.pathname + "/api", {
+                method: "POST",
+                body: JSON.stringify(obj)
+            });
+        }
+
+        if(req.ok){
+            alert("Orçamento salvo/atualizado com sucesso!");
+            window.location.reload();
+        } else {
+            alert("Erro ao salvar orçamento!");
+        }
+        
+    }
+    let orderdb;
+    let loadedFromDb = false;
+    const loadOrderDb = (e) => {
+        const name = e.target.value;
+        console.log(name);
+        
+        if(!name) return;
+
+        const order = data.dbData.orders.find(e=>e.name == name);
+
+        if(!order) return alert("Nenhum orçamento encontrado!");
+
+        loadOrderObj(order, true);
+        loadedFromDb = true;
+    }
+    const getOrderDb = async (name) => {
+        const req = await fetch(location.pathname + "/api", {
+            method: "POST",
+            body: JSON.stringify({
+                operation: "get-order",
+                name
+            })
+        });
+
+        if(!req.ok) return alert(`Erro ao carregar orçamento "${name}" do banco de dados!`);
+
+        console.log(req);
+        
+        orderdb.value = name;
+
+        return req.json();
+    }
+    const removeOrderDb = async () => {
+        const name = infoName.value;
+        if(!name)
+            return alert("Insira um nome para o orçamento!");
+
+        if(!confirm(`Tem certeza que deseja remover o orçamento "${name}" do banco de dados?`))
+            return;
+
+        const index = data.dbData.orders.findIndex(e=>e.name == name);
+
+        if(index == -1)
+            return alert("Nenhum orçamento encontrado!");
+
+        const req = await fetch(location.pathname + "/api", {
+            method: "POST",
+            body: JSON.stringify({
+                operation: "remove-order",
+                index
+            })
+        });
+
+        if(req.ok){
+            alert("Orçamento removido com sucesso!");
+            window.location.reload();
+        } else {
+            alert("Erro ao remover orçamento!");
+        }
+    }
+
 </script>
 
 
@@ -511,8 +655,35 @@
 
 <div class="pageContainer">
 
-    <form class="container" on:submit|preventDefault bind:this={form}>
-    
+    <div class="superUserSticky">
+        <div class="superUser">
+            <button class="toggle" aria-label="Super User" on:click={() => superUserMenu = !superUserMenu}>
+                <i class="fa fa-user-circle"></i>
+            </button>
+
+            <div class="superUserMenu" style:display={1 ? "flex" : "none"}>
+                <h3>Menu Super User</h3>
+                <br>
+                <h4>Banco de Dados</h4>
+                <p>Salvar orçamento no BD</p>
+                <button on:click={saveOrderDB}>{loadedFromDb ? "Atualizar" : "Salvar"}</button>
+
+                <br>
+                <p>Carregar orçamento do BD</p>
+                <select on:change={loadOrderDb} bind:this={orderdb}>
+                    <option value="" selected>Escolha um orçamento:</option>
+                    {#each data.dbData?.orders || [] as order }
+                        <option value={order.name}>{order.name}</option>
+                    {/each}
+                </select>
+                <br>
+                <p>Remover orçamento do BD</p>
+                <button style:background="red" on:click={removeOrderDb}>Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <form class="container" on:submit|preventDefault bind:this={form}>    
         <div class="inputArea" class:visible={!inputAreaVisible}>
             <h1>Orçamento</h1>
             <h2>~ {infoName?.value || "Novo Orçamento"} ~</h2>
@@ -526,8 +697,13 @@
         </div>
     
         <div class="inputArea" class:visible={inputAreaVisible}>
-            <h3>Nome do Orçamento : </h3>
-            <input type="text" bind:this={infoName} />
+            <div class="inputArea" class:visible={!data.superUser || data.loginBlocked}>
+                <input type="text" name="login" placeholder="Usuário">
+                <input type="password" name="password" placeholder="Senha">
+                <button on:click={loginForm}>Entrar</button>
+            </div>
+
+            <input type="text" bind:this={infoName} placeholder="Nome do orçamento" />
             <button on:click={saveOrder}>salvar</button>
             <br>
             
@@ -684,8 +860,7 @@
     
     
 
-        <div class="output"
-        >
+        <div class="output">
 
             {#if info.sum != undefined}
                 <div class="spliter">
@@ -935,11 +1110,49 @@
 <style>
 .container * {margin: 0; padding: 0; font-family: sans-serif}
 
+.superUserSticky {
+    position: sticky;
+    top: 0;
+    right: 0;
+}
+.superUser {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+.superUser .toggle {
+    border-radius: 15px;
+    padding: 0 !important;
+    border: 2px solid #1c1931;
+}
+
+.superUserMenu {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    background: white;
+    border: 2px solid #1c1931;
+    border-radius: 5px;
+}
+.superUserMenu * {
+    margin: 0;
+}
+
+
+
+
 .spliter.hidden, .outputContainer.hidden {
     display: none;
 }
 
 .pageContainer {
+    position: relative;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
