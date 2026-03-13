@@ -661,15 +661,15 @@
                 <i class="fa fa-user-circle"></i>
             </button>
 
-            <div class="superUserMenu" style:display={1 ? "flex" : "none"}>
-                <h3>Menu Super User</h3>
+            <div class="superUserMenu" style:display={superUserMenu ? "flex" : "none"}>
+                <h3>Menu Admin</h3>
                 <br>
-                <h4>Banco de Dados</h4>
-                <p>Salvar orçamento no BD</p>
+                <h4>Banco de Dados:</h4>
+                <p>Salvar orçamento</p>
                 <button on:click={saveOrderDB}>{loadedFromDb ? "Atualizar" : "Salvar"}</button>
 
                 <br>
-                <p>Carregar orçamento do BD</p>
+                <p>Carregar orçamento</p>
                 <select on:change={loadOrderDb} bind:this={orderdb}>
                     <option value="" selected>Escolha um orçamento:</option>
                     {#each data.dbData?.orders || [] as order }
@@ -677,7 +677,7 @@
                     {/each}
                 </select>
                 <br>
-                <p>Remover orçamento do BD</p>
+                <p>Remover orçamento</p>
                 <button style:background="red" on:click={removeOrderDb}>Remover</button>
             </div>
         </div>
