@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 
 import { SUPERUSER, SUPERUSER_PASSWORD } from "$env/static/private";
 
-import crypto from "crypto";
+import { randomUUID } from "node:crypto";
 import { redis } from "$lib/server/redis.js";
 
 
@@ -63,7 +63,7 @@ export async function POST({ request, cookies, getClientAddress  }) {
     await redis.del(loginAttemptsStr);
 
     const sessionStr = `${app}-session`;
-    const sessionId = `${sessionStr}-${crypto.randomUUID()}`;
+    const sessionId = `${sessionStr}-${randomUUID()}`;
     
     await redis.set(sessionId, true, {
         ex: 60 * 60 * 24 * 30
