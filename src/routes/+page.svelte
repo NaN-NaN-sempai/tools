@@ -1,9 +1,7 @@
 <script>
-
-    const modules = import.meta.glob('/src/routes/**');
+    const modules = import.meta.glob('/src/routes/**/+page.svelte');
 
     const routes = Object.keys(modules)
-        .filter(path => path.endsWith('+page.svelte'))
         .map(path => path .replace('/src/routes', '')
         .replace('/+page.svelte', '')
         .replace(/\[([^\]]+)\]/g, ':$1') );
