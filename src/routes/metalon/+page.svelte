@@ -655,7 +655,7 @@
 
 <div class="pageContainer">
 
-    <div class="superUserSticky">
+    <div class="superUserSticky" style:display={superUserMenu ? "flex" : "none"}>
         <div class="superUser">
             <button class="toggle" aria-label="Super User" on:click={() => superUserMenu = !superUserMenu}>
                 <i class="fa fa-user-circle"></i>
