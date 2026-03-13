@@ -6,6 +6,9 @@
     import Lhs from "./partners/lhs.svelte";
     import Mr from "./partners/mr.svelte";
     export let data;
+
+    console.log(data);
+    
     
     
 
@@ -655,7 +658,7 @@
 
 <div class="pageContainer">
 
-    <div class="superUserSticky" style:display={superUserMenu ? "flex" : "none"}>
+    <div class="superUserSticky" style:display={data.superUser ? "flex" : "none"}>
         <div class="superUser">
             <button class="toggle" aria-label="Super User" on:click={() => superUserMenu = !superUserMenu}>
                 <i class="fa fa-user-circle"></i>
