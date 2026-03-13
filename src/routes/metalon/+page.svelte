@@ -555,7 +555,7 @@
         }
 
         const obj = {
-            order: gatherOrder(),
+            order: {...gatherOrder(), lastUpdate: Date.now()},
         }
         let req;
 
@@ -675,7 +675,7 @@
                 <select on:change={loadOrderDb} bind:this={orderdb}>
                     <option value="" selected>Escolha um orçamento:</option>
                     {#each data.dbData?.orders || [] as order }
-                        <option value={order.name}>{order.name}</option>
+                        <option value={order.name}>{order.name} - {new Date(order.lastUpdate).toLocaleString("pt-BR", {year: "2-digit", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric"})}</option>
                     {/each}
                 </select>
                 <br>
